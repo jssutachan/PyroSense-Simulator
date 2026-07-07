@@ -18,6 +18,9 @@ build/
 .venv/
 venv/
 
+# ─── Sitio de documentación generado (mkdocs build) ───
+site/
+
 # ─── Caches de tooling ───
 .pytest_cache/
 .mypy_cache/

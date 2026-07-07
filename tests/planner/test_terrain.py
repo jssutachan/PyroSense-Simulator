@@ -59,6 +59,13 @@ class TestElevationAt:
             TerrainModel(path)
 
 
+def test_repr_reports_shape_and_bounds(tmp_path: Path) -> None:
+    terrain = ramp_dem(tmp_path)
+    assert repr(terrain) == (
+        "TerrainModel(50x100 cells, lon [-74.1000, -74.0000], lat [4.5000, 4.6000])"
+    )
+
+
 class TestSlopeAt:
     def test_flat_terrain_has_zero_slope(self, tmp_path: Path) -> None:
         data = np.full((HEIGHT, WIDTH), 2800.0)
