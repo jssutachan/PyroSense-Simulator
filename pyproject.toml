@@ -97,6 +97,12 @@ addopts = [
     "--cov-fail-under=90",
     "--strict-markers",
 ]
+filterwarnings = [
+    "error",
+    # rasterio (<=1.4) aún asigna ndarray.shape, deprecado en NumPy 2.5; issue upstream,
+    # revisar al actualizar rasterio
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning",
+]
 
 [tool.coverage.run]
 branch = true
