@@ -16,3 +16,5 @@ Un ADR no se edita para cambiar la decisión: se escribe uno nuevo que lo supers
 | [0008](ADR-0008-gateways-metadato.md) | Gateways como metadato: sin simulación de radio | Aceptado |
 | [0009](ADR-0009-ruido-en-el-sensor.md) | El ambiente es verdad de terreno; el ruido vive en el sensor | Aceptado |
 | [0010](ADR-0010-stdout-canal-de-datos.md) | stdout es el canal de datos; los logs van a stderr | Aceptado |
+| [0011](ADR-0011-fuego-parametrico.md) | Los eventos de fuego son interpolación paramétrica, no física | Aceptado |
+| [0012](ADR-0012-fallos-como-decorador.md) | Los fallos se inyectan en el flujo de mensajes, no en los nodos | Aceptado |

@@ -59,5 +59,7 @@ nav:
       - ADR-0008 Gateways sin radio: adr/ADR-0008-gateways-metadato.md
       - ADR-0009 Ruido en el sensor: adr/ADR-0009-ruido-en-el-sensor.md
       - ADR-0010 stdout canal de datos: adr/ADR-0010-stdout-canal-de-datos.md
+      - ADR-0011 Fuego paramétrico: adr/ADR-0011-fuego-parametrico.md
+      - ADR-0012 Fallos como decorador: adr/ADR-0012-fallos-como-decorador.md
   - Guía de contribución: CONTRIBUTING.md
   - Revisión de buenas prácticas: best-practices-review.md

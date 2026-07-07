@@ -26,4 +26,5 @@ sensores simulados y la plataforma cloud.
 | Consolidación | Git Flow, refactor de buenas prácticas, esta documentación | ✅ |
 | 4 | Site-planner completo: placement hexagonal, gateways, plan GeoJSON y CLI | ✅ |
 | 5 | Fleet-sim: motor de flota baseline (ambiente, nodos, scheduler, CLI) | ✅ |
-| 6+ | Eventos de fuego/fallos; publisher MQTT/IoT Core y carga | ⏳ |
+| 6 | Eventos de fuego paramétricos + inyector de fallos componible | ✅ |
+| 7 | Publisher MQTT/IoT Core y pruebas de carga | ⏳ |

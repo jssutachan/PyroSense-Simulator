@@ -84,6 +84,15 @@ fleet-sim run --site out/sensores.geojson --scenario scenarios/baseline.yaml \
 # Temporada seca estilo El Niño, a archivo con rotación:
 fleet-sim run --site out/sensores.geojson --scenario scenarios/temporada_seca.yaml \
     --publisher file --out out/telemetry.ndjson --speed 3600
+
+# Replay paramétrico del incendio de enero 2024 (correlación multi-sensor):
+fleet-sim run --site out/sensores.geojson --scenario scenarios/replay_enero_2024.yaml \
+    --publisher stdout --speed 600
+
+# Red degradada: dropout, ráfaga de reconexión con timestamps viejos,
+# duplicados QoS 1, desorden y baterías cayendo:
+fleet-sim run --site out/sensores.geojson --scenario scenarios/fallos.yaml \
+    --publisher stdout --speed 600
 ```
 
 Los datos van por stdout y los logs por stderr ([ADR-0010](docs/adr/ADR-0010-stdout-canal-de-datos.md)),
