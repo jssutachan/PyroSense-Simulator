@@ -74,6 +74,23 @@ semilla usada. **Misma semilla + mismos insumos ⇒ salida byte-idéntica**
 ([ADR-0007](docs/adr/ADR-0007-plan-determinista.md)); el AOI es un GeoJSON con el
 polígono del área (FeatureCollection, Feature o geometría directa).
 
+**Simular la flota** (sin ninguna credencial ni conexión AWS):
+
+```bash
+# 24 h del escenario base a 1 h simulada por minuto real, NDJSON a stdout:
+fleet-sim run --site out/sensores.geojson --scenario scenarios/baseline.yaml \
+    --publisher stdout --speed 60 > telemetry.ndjson
+
+# Temporada seca estilo El Niño, a archivo con rotación:
+fleet-sim run --site out/sensores.geojson --scenario scenarios/temporada_seca.yaml \
+    --publisher file --out out/telemetry.ndjson --speed 3600
+```
+
+Los datos van por stdout y los logs por stderr ([ADR-0010](docs/adr/ADR-0010-stdout-canal-de-datos.md)),
+así que los pipes quedan limpios. Ctrl-C cierra ordenado con resumen (total emitido,
+desglose por status, duración simulada vs real). Misma semilla de escenario ⇒ misma
+secuencia exacta de payloads.
+
 **Exportar el contrato como JSON Schema** (para el equipo cloud):
 
 ```bash
@@ -137,7 +154,7 @@ mkdocs serve                             # docs en http://127.0.0.1:8000
 │   ├── contracts/     # Payload v1 (pydantic) + exportador de JSON Schema — LA frontera
 │   ├── publishers/    # Protocol Publisher + stdout/file (NDJSON); MQTT llega después
 │   ├── planner/       # site-planner: terreno, zonas, placement, gateways, plan y CLI
-│   └── fleet/         # fleet-sim (Path 5)
+│   └── fleet/         # fleet-sim: escenario, ambiente, nodos, scheduler y CLI
 ├── tests/             # espeja src/; DEMs sintéticos, cero datos externos
 ├── docs/              # arquitectura, contrato, ADRs, contribución (sitio MkDocs)
 ├── config/            # configuración de los programas

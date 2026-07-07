@@ -37,3 +37,17 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 ::: pyrosense_sim.planner.cli
 
 ::: pyrosense_sim.planner.preview
+
+## Fleet-sim
+
+::: pyrosense_sim.fleet.config
+
+::: pyrosense_sim.fleet.environment
+
+::: pyrosense_sim.fleet.node
+
+::: pyrosense_sim.fleet.scheduler
+
+::: pyrosense_sim.fleet.orchestrator
+
+::: pyrosense_sim.fleet.cli

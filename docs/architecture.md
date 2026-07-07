@@ -57,7 +57,12 @@ flowchart LR
 | `planner/gateways.py` | Clustering k-means de nodos y snap de gateways a terreno alto (solo metadato) | ✅ |
 | `planner/site_plan.py` | Ensambla el plan y serializa los 3 artefactos deterministas | ✅ |
 | `planner/params.py` / `planner/cli.py` | Configuración YAML validada en frontera + CLI typer (`site-planner`) | ✅ |
-| `fleet/` | Simular la flota: estado por nodo, señales ambientales, fallas | ⏳ Path 5 |
+| `fleet/config.py` | Frontera del escenario YAML (pydantic estricto) | ✅ |
+| `fleet/environment.py` | Verdad de terreno pura: ciclo diurno, lapse rate, humedad anticorrelacionada | ✅ |
+| `fleet/node.py` | El instrumento ruidoso: RNG propio, `seq`, batería, cadencia adaptativa | ✅ |
+| `fleet/scheduler.py` | Reloj simulado con aceleración y orden determinista de emisiones | ✅ |
+| `fleet/orchestrator.py` / `fleet/cli.py` | Composición (DIP) + CLI `fleet-sim` cancelable con resumen | ✅ |
+| `fleet/` (eventos de fuego/fallos) | Perturbaciones sobre la línea base | ⏳ Path 6 |
 
 ## Cómo fluyen los datos
 
@@ -69,9 +74,14 @@ flowchart LR
    emite tres artefactos **deterministas** (misma semilla ⇒ bytes idénticos, ADR-0007):
    `sensores.geojson` (la entrada del fleet-sim; esquema estable), `gateways.geojson`
    y `site-report.md`.
-2. **Tiempo de simulación (continuo):** el fleet-sim lee ese plan, simula cada nodo y
-   emite `TelemetryPayload` validados hacia un `Publisher` inyectado. Cambiar de
-   "imprimir en pantalla" a "publicar a AWS IoT Core" es un cambio de wiring, no de código.
+2. **Tiempo de simulación (continuo):** `fleet-sim run` lee ese plan, instancia un
+   `SensorNode` por feature y avanza un reloj simulado con aceleración configurable
+   (`--speed`). Cada nodo consulta la verdad de terreno (`EnvironmentModel`, puro y
+   determinista), le aplica su propio ruido de sensor sembrado (ADR-0009), y emite
+   `TelemetryPayload` validados hacia un `Publisher` inyectado — stdout y archivo hoy,
+   MQTT/IoT Core en el Path 7. Cambiar de transporte es un cambio de wiring, no de
+   código. Los datos salen por stdout y los logs por stderr (ADR-0010); Ctrl-C cierra
+   limpio con resumen.
 
 ## Las fronteras (y por qué el contrato es sagrado)
 
