@@ -62,7 +62,9 @@ flowchart LR
 | `fleet/node.py` | El instrumento ruidoso: RNG propio, `seq`, batería, cadencia adaptativa | ✅ |
 | `fleet/scheduler.py` | Reloj simulado con aceleración y orden determinista de emisiones | ✅ |
 | `fleet/orchestrator.py` / `fleet/cli.py` | Composición (DIP) + CLI `fleet-sim` cancelable con resumen | ✅ |
-| `fleet/` (eventos de fuego/fallos) | Perturbaciones sobre la línea base | ⏳ Path 6 |
+| `fleet/fire_event.py` | Fuego paramétrico: firma multi-sensor plausible, no física (ADR-0011) | ✅ |
+| `fleet/faults.py` | Inyector de fallos como decorador del `Publisher` (ADR-0012) | ✅ |
+| `publishers/` (MQTT) | Transporte AWS IoT Core | ⏳ Path 7 |
 
 ## Cómo fluyen los datos
 

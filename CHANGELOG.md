@@ -3,6 +3,21 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versionado alineado a hitos del proyecto. Una entrada por path completado.
 
+## [0.6.0] — Path 6: eventos de fuego + inyección de fallos — 2026-07-07
+
+### Added
+- `FireEvent`: fuego paramétrico (círculo con crecimiento radial, deriva por
+  viento, ramp-in smoothstep, halo de decaimiento) que perturba la línea base en
+  `EnvironmentModel.conditions_at` — interpolación, no física (ADR-0011).
+- `FaultInjector`: decorador componible del `Publisher` (ADR-0012) —
+  `node_dropout`, `burst_reconnect` (backlog con `ts_device` originales y `seq`
+  consecutivos), `duplicates` QoS 1, `out_of_order`, `battery_decay`;
+  `SensorNode` intacto.
+- Escenarios `replay_enero_2024.yaml` (firma del incendio real, comentado) y
+  `fallos.yaml` (los cinco fallos, componible sobre cualquier escenario).
+- Bloques `fires:`/`faults:` en el YAML de escenario, validación estricta;
+  `geo.distance_m` compartido.
+
 ## [0.5.0] — Path 5: motor de flota baseline — 2026-07-07
 
 ### Added

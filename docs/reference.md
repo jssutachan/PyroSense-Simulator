@@ -46,6 +46,10 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 
 ::: pyrosense_sim.fleet.node
 
+::: pyrosense_sim.fleet.fire_event
+
+::: pyrosense_sim.fleet.faults
+
 ::: pyrosense_sim.fleet.scheduler
 
 ::: pyrosense_sim.fleet.orchestrator

@@ -22,6 +22,8 @@ from typing import cast
 
 from pyrosense_sim.fleet.config import ScenarioConfig
 from pyrosense_sim.fleet.environment import EnvironmentModel
+from pyrosense_sim.fleet.faults import FaultInjector
+from pyrosense_sim.fleet.fire_event import FireEvent
 from pyrosense_sim.fleet.node import SensorNode
 from pyrosense_sim.fleet.scheduler import Scheduler
 from pyrosense_sim.planner.zones import Tier
@@ -86,8 +88,13 @@ class FleetOrchestrator:
                 required properties.
         """
         nodes = _load_nodes(site_path, scenario)
-        environment = EnvironmentModel(scenario.environment)
+        fires = tuple(FireEvent.from_config(fire) for fire in scenario.fires)
+        environment = EnvironmentModel(scenario.environment, fires)
         scheduler = Scheduler(nodes, duration_s=scenario.duration_s, speed=speed, sleep_fn=sleep_fn)
+        if scenario.faults is not None:
+            publisher = FaultInjector(
+                publisher, scenario.faults, start_time=scenario.start_time, seed=scenario.seed
+            )
         return cls(nodes, environment, scheduler, publisher)
 
     def run(self) -> FleetSummary:
