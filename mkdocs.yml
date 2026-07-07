@@ -55,5 +55,7 @@ nav:
       - ADR-0004 Git Flow simplificado: adr/ADR-0004-git-flow.md
       - ADR-0005 El sensor no alerta: adr/ADR-0005-sensor-no-alerta.md
       - ADR-0006 Tooling uv + src layout: adr/ADR-0006-tooling.md
+      - ADR-0007 Plan determinista: adr/ADR-0007-plan-determinista.md
+      - ADR-0008 Gateways sin radio: adr/ADR-0008-gateways-metadato.md
   - Guía de contribución: CONTRIBUTING.md
   - Revisión de buenas prácticas: best-practices-review.md

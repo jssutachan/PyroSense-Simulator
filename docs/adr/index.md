@@ -12,3 +12,5 @@ Un ADR no se edita para cambiar la decisión: se escribe uno nuevo que lo supers
 | [0004](ADR-0004-git-flow.md) | Git Flow simplificado (main/develop/feature) | Aceptado |
 | [0005](ADR-0005-sensor-no-alerta.md) | El sensor reporta salud del dispositivo, no alertas de fuego | Aceptado |
 | [0006](ADR-0006-tooling.md) | Tooling: uv, src layout, mypy strict, cobertura con umbral vivo | Aceptado |
+| [0007](ADR-0007-plan-determinista.md) | El plan de despliegue es determinista por contrato | Aceptado |
+| [0008](ADR-0008-gateways-metadato.md) | Gateways como metadato: sin simulación de radio | Aceptado |

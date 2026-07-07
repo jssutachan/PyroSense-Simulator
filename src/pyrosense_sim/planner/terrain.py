@@ -27,8 +27,8 @@ from rasterio.enums import Resampling
 from rasterio.transform import Affine, array_bounds, rowcol
 from rasterio.warp import calculate_default_transform, reproject
 
-_M_PER_DEG_LAT = 110_540.0
-_M_PER_DEG_LON_AT_EQUATOR = 111_320.0
+from pyrosense_sim.planner.geo import M_PER_DEG_LAT, M_PER_DEG_LON_EQUATOR
+
 _WGS84 = CRS.from_epsg(4326)
 
 
@@ -94,6 +94,11 @@ class TerrainModel:
         """DEM extent as (min_lon, min_lat, max_lon, max_lat) in EPSG:4326."""
         return self._bounds
 
+    @property
+    def elevation_grid(self) -> npt.NDArray[np.float64]:
+        """The raw elevation raster (row 0 = north). Treat as read-only."""
+        return self._data
+
     def elevation_at(self, lon: float, lat: float) -> float:
         """Sample the elevation at a point.
 
@@ -140,8 +145,8 @@ class TerrainModel:
             raise ValueError(msg)
 
         xres_deg, yres_deg = abs(self._transform.a), abs(self._transform.e)
-        xres_m = xres_deg * _M_PER_DEG_LON_AT_EQUATOR * cos(radians(lat))
-        yres_m = yres_deg * _M_PER_DEG_LAT
+        xres_m = xres_deg * M_PER_DEG_LON_EQUATOR * cos(radians(lat))
+        yres_m = yres_deg * M_PER_DEG_LAT
         dz_dx = (east - west) / (2.0 * xres_m)
         dz_dy = (south - north) / (2.0 * yres_m)
         return degrees(atan(hypot(dz_dx, dz_dy)))

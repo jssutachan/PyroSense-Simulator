@@ -24,5 +24,5 @@ sensores simulados y la plataforma cloud.
 | 2 | Contrato de telemetría v1 + publishers stdout/file | ✅ |
 | 3 | Site-planner: modelo de terreno y zonas prioritarias | ✅ |
 | Consolidación | Git Flow, refactor de buenas prácticas, esta documentación | ✅ |
-| 4 | Site-planner: ubicación de sensores + plan GeoJSON | ⏳ |
+| 4 | Site-planner completo: placement hexagonal, gateways, plan GeoJSON y CLI | ✅ |
 | 5+ | Fleet-sim: motor de simulación y publisher MQTT/IoT Core | ⏳ |
