@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyrosense-sim"
+version = "0.1.0"
+description = "Simulation subsystem for PyroSense: site planning and IoT sensor fleet simulation for early wildfire detection (Cerros Orientales, Bogotá)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Juan Sebastián Sutachán Correa", email = "jsebastiansc935@gmail.com" },
+]
+keywords = ["iot", "simulation", "wildfire", "aws", "mqtt", "geospatial"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+# NOTE: contrastar contra la referencia global del proyecto antes del Path 2.
+dependencies = [
+    "numpy>=2.0",
+    "rasterio>=1.4",          # lectura del DEM (GeoTIFF)
+    "shapely>=2.0",           # geometría (áreas candidatas, cobertura)
+    "pyproj>=3.7",            # transformaciones de CRS (WGS84 <-> MAGNA-SIRGAS / UTM)
+    "pydantic>=2.9",          # contratos de mensajes y validación
+    "pydantic-settings>=2.6", # configuración desde .env
+    "pyyaml>=6.0",            # escenarios y configuración declarativa
+    "typer>=0.15",            # CLIs: site-planner y fleet-sim
+    "awsiotsdk>=1.22",        # publicación MQTT hacia AWS IoT Core
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "mypy>=1.13",
+    "ruff>=0.8",
+]
+
+# [project.scripts] se declarará en el Path 2, cuando existan los entry points
+# reales de site-planner y fleet-sim. Declarar scripts hacia módulos inexistentes
+# instalaría binarios rotos.
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyrosense_sim"]
+
+# ─── Ruff: lint + format ────────────────────────────────────────────────
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+    "PT",  # flake8-pytest-style
+    "RUF", # reglas propias de ruff
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]  # assert es idiomático en pytest
+
+# ─── mypy: modo estricto ────────────────────────────────────────────────
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["pyrosense_sim"]
+warn_unreachable = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+# rasterio no publica stubs completos; se aísla aquí en vez de relajar todo el proyecto
+module = ["rasterio.*"]
+ignore_missing_imports = true
+
+# ─── pytest + cobertura ─────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=src",
+    "--cov-report=term-missing",
+    # Umbral placeholder: subirá a medida que entre lógica real (meta: >=85)
+    "--cov-fail-under=0",
+    "--strict-markers",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]

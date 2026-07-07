@@ -1,0 +1,36 @@
+# ─── Secretos y credenciales — NUNCA versionar ───
+.env
+*.pem
+*.key
+*.crt
+certs/
+
+# ─── Artefactos de ejecución ───
+out/
+*.log
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# ─── Caches de tooling ───
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ─── Datos geoespaciales pesados (ver data/README.md) ───
+data/*.tif
+data/*.tiff
+data/*.zip
+
+# ─── IDE / SO ───
+.vscode/
+.idea/
+.DS_Store
