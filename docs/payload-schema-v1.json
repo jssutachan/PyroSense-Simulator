@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "DeviceStatus": {
+      "description": "Device health status. Not a fire signal (see module docstring).",
+      "enum": [
+        "OK",
+        "DEGRADED",
+        "LOW_BATTERY"
+      ],
+      "title": "DeviceStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Flat (non-nested) telemetry payload, contract v1.",
+  "properties": {
+    "battery_pct": {
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Battery Pct",
+      "type": "number"
+    },
+    "device_id": {
+      "pattern": "^PYRO-T[123]-\\d{4}$",
+      "title": "Device Id",
+      "type": "string"
+    },
+    "elevation_m": {
+      "title": "Elevation M",
+      "type": "number"
+    },
+    "gateway_id": {
+      "pattern": "^GW-\\d{2,}$",
+      "title": "Gateway Id",
+      "type": "string"
+    },
+    "lat": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Lat",
+      "type": "number"
+    },
+    "lon": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Lon",
+      "type": "number"
+    },
+    "rh_pct": {
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Rh Pct",
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seq": {
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "smoke_ppm": {
+      "minimum": 0.0,
+      "title": "Smoke Ppm",
+      "type": "number"
+    },
+    "status": {
+      "$ref": "#/$defs/DeviceStatus"
+    },
+    "temp_c": {
+      "maximum": 80.0,
+      "minimum": -20.0,
+      "title": "Temp C",
+      "type": "number"
+    },
+    "ts_device": {
+      "format": "date-time",
+      "title": "Ts Device",
+      "type": "string"
+    },
+    "wind_dir_deg": {
+      "anyOf": [
+        {
+          "maximum": 360.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Wind Dir Deg"
+    },
+    "wind_speed_ms": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Wind Speed Ms"
+    }
+  },
+  "required": [
+    "device_id",
+    "gateway_id",
+    "ts_device",
+    "seq",
+    "lat",
+    "lon",
+    "elevation_m",
+    "temp_c",
+    "rh_pct",
+    "smoke_ppm",
+    "wind_speed_ms",
+    "wind_dir_deg",
+    "battery_pct",
+    "status"
+  ],
+  "title": "TelemetryPayload",
+  "type": "object"
+}
