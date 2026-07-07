@@ -1,0 +1,24 @@
+# Temporada seca bajo El Niño (enero): más caliente, mucho más seco y
+# con más viento. SIN fuego — es el "día de riesgo alto" que precede a
+# los escenarios de incendio del Path 6. Las condiciones se acercan a
+# los umbrales de alerta de los nodos sin cruzarlos sistemáticamente.
+name: temporada_seca
+description: >
+  Día seco de El Niño en los Cerros Orientales, como los previos a los
+  incendios de enero de 2024: temperaturas altas para la sabana,
+  humedad relativa baja y viento sostenido del oriente.
+start_time: "2026-01-15T00:00:00Z"
+duration_hours: 24.0
+seed: 20260115
+
+environment:
+  temp_mean_c: 17.0
+  temp_amplitude_c: 8.0
+  temp_peak_hour: 13.5
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 50.0
+  rh_amplitude_pct: 20.0
+  wind_speed_mean_ms: 4.5
+  wind_dir_mean_deg: 95.0
+  smoke_baseline_ppm: 0.03
