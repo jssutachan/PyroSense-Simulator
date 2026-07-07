@@ -3,6 +3,24 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versionado alineado a hitos del proyecto. Una entrada por path completado.
 
+## [0.7.0] — Path 7: publisher MQTT, carga y cierre — 2026-07-07
+
+### Added
+- `MqttPublisher`: TLS mutua hacia AWS IoT Core, topic
+  `{base}/{env}/telemetry/{device_id}` con **QoS 1**, reintentos con backoff
+  exponencial + jitter, métricas periódicas al log, cero secretos en logs y
+  config solo por env/.env (pydantic-settings). Dedupe por `device_id`+`seq`
+  es responsabilidad de la nube — ADR-0013. Probado íntegramente con broker
+  mockeado; el uso real espera a la etapa E2.
+- `scenarios/carga.yaml` + `load.fleet_multiplier`: réplica de flota con
+  device_ids derivados válidos (~25× el volumen del baseline con cadencia 60 s).
+- `--publisher mqtt` en el CLI (import perezoso: el modo offline no toca AWS);
+  `config/publisher.example.yaml` documentando los tres transportes.
+- README final con las 5 decisiones de diseño defendibles en entrevista.
+
+### Fixed
+- `.env.example`: `PYROSENSE_TOPIC_BASE` alineado al layout real de topics.
+
 ## [0.6.0] — Path 6: eventos de fuego + inyección de fallos — 2026-07-07
 
 ### Added

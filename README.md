@@ -93,6 +93,15 @@ fleet-sim run --site out/sensores.geojson --scenario scenarios/replay_enero_2024
 # duplicados QoS 1, desorden y baterías cayendo:
 fleet-sim run --site out/sensores.geojson --scenario scenarios/fallos.yaml \
     --publisher stdout --speed 600
+
+# Prueba de carga (~25x el volumen del baseline: flota 5x + cadencia 60 s):
+fleet-sim run --site out/sensores.geojson --scenario scenarios/carga.yaml \
+    --publisher stdout --speed 3600 > /dev/null   # medir con los logs de stderr
+
+# Hacia AWS IoT Core (cuando exista la etapa E2): TLS mutua + QoS 1;
+# credenciales SIEMPRE por .env (ver .env.example y config/publisher.example.yaml):
+fleet-sim run --site out/sensores.geojson --scenario scenarios/baseline.yaml \
+    --publisher mqtt --speed 60
 ```
 
 Los datos van por stdout y los logs por stderr ([ADR-0010](docs/adr/ADR-0010-stdout-canal-de-datos.md)),
@@ -161,7 +170,7 @@ mkdocs serve                             # docs en http://127.0.0.1:8000
 ```
 ├── src/pyrosense_sim/
 │   ├── contracts/     # Payload v1 (pydantic) + exportador de JSON Schema — LA frontera
-│   ├── publishers/    # Protocol Publisher + stdout/file (NDJSON); MQTT llega después
+│   ├── publishers/    # Protocol Publisher + stdout/file (NDJSON) + MQTT (IoT Core, QoS 1)
 │   ├── planner/       # site-planner: terreno, zonas, placement, gateways, plan y CLI
 │   └── fleet/         # fleet-sim: escenario, ambiente, nodos, scheduler y CLI
 ├── tests/             # espeja src/; DEMs sintéticos, cero datos externos
@@ -178,13 +187,32 @@ mkdocs serve                             # docs en http://127.0.0.1:8000
 - **[Referencia de API](docs/reference.md)** — generada desde docstrings (`mkdocs serve`).
 - **[CHANGELOG](CHANGELOG.md)** — una entrada por path.
 
-## Decisiones de diseño
+## Las 5 decisiones de diseño (y su porqué)
 
-Registradas como [ADRs](docs/adr/index.md): [dos programas](docs/adr/ADR-0001-dos-programas.md) ·
-[contrato primero](docs/adr/ADR-0002-contrato-primero.md) ·
-[Pydantic en frontera](docs/adr/ADR-0003-pydantic-frontera.md) ·
-[Git Flow](docs/adr/ADR-0004-git-flow.md) ·
-[el sensor no alerta](docs/adr/ADR-0005-sensor-no-alerta.md) ·
-[tooling](docs/adr/ADR-0006-tooling.md) ·
-[plan determinista](docs/adr/ADR-0007-plan-determinista.md) ·
-[gateways sin radio](docs/adr/ADR-0008-gateways-metadato.md)
+1. **Dos programas, no uno** — planificar (offline, geoespacial-pesado, corre una
+   vez) y simular (long-running, I/O-pesado) tienen ciclos de vida y dependencias
+   distintos; el plan GeoJSON intermedio es inspeccionable, versionable y editable
+   entre etapas → [ADR-0001](docs/adr/ADR-0001-dos-programas.md).
+2. **QoS 1 con deduplicación en la nube** — perder lecturas es inaceptable y
+   exactly-once no existe en IoT Core; el payload carga `device_id`+`seq` desde el
+   día uno para que la Lambda sea idempotente. El simulador entrena esa
+   responsabilidad con el fallo `duplicates` → [ADR-0013](docs/adr/ADR-0013-qos1-dedupe-en-nube.md).
+3. **La frecuencia adaptativa es el origen del patrón de ráfaga** — un nodo que ve
+   condiciones elevadas pasa de 300 s a 30 s por sí solo; un incendio real produce
+   entonces una ráfaga espacialmente correlacionada de mensajes (verificado: los
+   nodos en zona de fuego emiten 4–6× más). El pipeline debe dimensionarse para
+   ese pico, no para el promedio — y el escenario `carga.yaml` lo estresa a
+   propósito.
+4. **El gateway es metadato: no se simula radio** — `ceil(n/60)` clusters k-means
+   con snap a terreno alto dan el `gateway_id` que el payload necesita, sin
+   desviar el proyecto a un problema de RF que no es su objetivo →
+   [ADR-0008](docs/adr/ADR-0008-gateways-metadato.md).
+5. **Cero física de fuego, deliberadamente** — `FireEvent` es interpolación
+   paramétrica (círculo + viento + rampa suave) que produce la *firma* multi-sensor
+   que la detección necesita; Rothermel/FARSITE exigirían datos que no existen y
+   no mejorarían la validación del pipeline →
+   [ADR-0011](docs/adr/ADR-0011-fuego-parametrico.md).
+
+El registro completo (13 decisiones): [ADRs](docs/adr/index.md) — contrato
+congelado, Pydantic-frontera, Git Flow, sensor-no-alerta, tooling, plan
+determinista, ruido-en-el-sensor, stdout-canal-de-datos, fallos-como-decorador.

@@ -27,4 +27,8 @@ sensores simulados y la plataforma cloud.
 | 4 | Site-planner completo: placement hexagonal, gateways, plan GeoJSON y CLI | ✅ |
 | 5 | Fleet-sim: motor de flota baseline (ambiente, nodos, scheduler, CLI) | ✅ |
 | 6 | Eventos de fuego paramétricos + inyector de fallos componible | ✅ |
-| 7 | Publisher MQTT/IoT Core y pruebas de carga | ⏳ |
+| 7 | Publisher MQTT (IoT Core, QoS 1) + escenario de carga + cierre | ✅ |
+
+**El subsistema de simulación está completo.** El uso real de MQTT contra AWS
+IoT Core se activa cuando exista la infraestructura cloud (etapa E2 del
+proyecto PyroSense).

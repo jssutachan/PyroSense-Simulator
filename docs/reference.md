@@ -18,6 +18,8 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 
 ::: pyrosense_sim.publishers.file
 
+::: pyrosense_sim.publishers.mqtt
+
 ## Site-planner
 
 ::: pyrosense_sim.planner.terrain

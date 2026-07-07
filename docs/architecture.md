@@ -64,7 +64,7 @@ flowchart LR
 | `fleet/orchestrator.py` / `fleet/cli.py` | Composición (DIP) + CLI `fleet-sim` cancelable con resumen | ✅ |
 | `fleet/fire_event.py` | Fuego paramétrico: firma multi-sensor plausible, no física (ADR-0011) | ✅ |
 | `fleet/faults.py` | Inyector de fallos como decorador del `Publisher` (ADR-0012) | ✅ |
-| `publishers/` (MQTT) | Transporte AWS IoT Core | ⏳ Path 7 |
+| `publishers/mqtt.py` | Transporte AWS IoT Core: TLS mutua, QoS 1, backoff+jitter, métricas (ADR-0013) | ✅ |
 
 ## Cómo fluyen los datos
 
