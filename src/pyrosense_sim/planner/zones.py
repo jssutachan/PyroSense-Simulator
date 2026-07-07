@@ -17,9 +17,9 @@ from typing import Literal
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, shape
 from shapely.geometry.base import BaseGeometry
 
-Tier = Literal[1, 2, 3]
+from pyrosense_sim.planner.geo import M_PER_DEG_LON_EQUATOR
 
-_M_PER_DEG_LON_AT_EQUATOR = 111_320.0
+Tier = Literal[1, 2, 3]
 
 
 @dataclass(frozen=True)
@@ -163,7 +163,7 @@ class ZoneSet:
         western_edge = LineString([(min_lon, min_lat), (min_lon, max_lat)])
         features = [western_edge, *trails]
 
-        buffer_deg = t1_buffer_m / _M_PER_DEG_LON_AT_EQUATOR
+        buffer_deg = t1_buffer_m / M_PER_DEG_LON_EQUATOR
         t2_outer = _buffer_union(features, 2 * buffer_deg)
         t1_geom = _as_areal(_buffer_union(features, buffer_deg).intersection(aoi))
         t2_geom = _as_areal(t2_outer.intersection(aoi).difference(t1_geom))
