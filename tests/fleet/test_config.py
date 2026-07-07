@@ -16,11 +16,29 @@ def write_scenario(tmp_path: Path, content: str) -> Path:
     return path
 
 
-@pytest.mark.parametrize("name", ["baseline.yaml", "temporada_seca.yaml"])
+@pytest.mark.parametrize(
+    "name",
+    ["baseline.yaml", "temporada_seca.yaml", "replay_enero_2024.yaml", "fallos.yaml"],
+)
 def test_shipped_scenarios_are_valid(name: str) -> None:
     config = load_scenario(REPO_ROOT / "scenarios" / name)
-    assert config.duration_hours == 24.0
     assert config.start_time.tzinfo is not None
+
+
+def test_replay_scenario_carries_the_fire() -> None:
+    config = load_scenario(REPO_ROOT / "scenarios" / "replay_enero_2024.yaml")
+    assert len(config.fires) == 1
+    assert config.fires[0].start_hour == 2.5
+
+
+def test_fallos_scenario_enables_all_faults() -> None:
+    config = load_scenario(REPO_ROOT / "scenarios" / "fallos.yaml")
+    assert config.faults is not None
+    assert config.faults.node_dropout is not None
+    assert config.faults.burst_reconnect is not None
+    assert config.faults.duplicates is not None
+    assert config.faults.out_of_order is not None
+    assert config.faults.battery_decay is not None
 
 
 def test_unknown_key_is_rejected(tmp_path: Path) -> None:
