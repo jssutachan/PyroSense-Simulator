@@ -18,15 +18,21 @@ Baseline physics (reasoned approximations):
   hour), clamped to [0, 100].
 - Wind and smoke: constant baseline means.
 
-Path 6 hook: fire events will perturb the baseline in
-:meth:`EnvironmentModel.conditions_at`; in this path the event list is
-empty by construction.
+Fire events (Path 6) perturb the baseline in
+:meth:`EnvironmentModel.conditions_at`: each active
+:class:`~pyrosense_sim.fleet.fire_event.FireEvent` adds its deltas on
+top of the baseline, in configuration order.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from math import cos, pi
+from typing import TYPE_CHECKING
 
 from pyrosense_sim.fleet.config import EnvironmentConfig
+
+if TYPE_CHECKING:
+    from pyrosense_sim.fleet.fire_event import FireEvent
 
 
 @dataclass(frozen=True)
@@ -43,13 +49,16 @@ class Conditions:
 class EnvironmentModel:
     """Deterministic baseline conditions over the AOI."""
 
-    def __init__(self, config: EnvironmentConfig) -> None:
+    def __init__(self, config: EnvironmentConfig, fires: Sequence["FireEvent"] = ()) -> None:
         """Configure the model.
 
         Args:
             config: Validated environment parameters from the scenario.
+            fires: Parametric fire events to overlay on the baseline
+                (empty for healthy-operation scenarios).
         """
         self._config = config
+        self._fires = tuple(fires)
 
     def conditions_at(self, lon: float, lat: float, elevation_m: float, t_s: float) -> Conditions:
         """Ground-truth conditions at a position and simulated time.
@@ -65,7 +74,6 @@ class EnvironmentModel:
         Returns:
             The noise-free conditions a perfect instrument would read.
         """
-        del lon, lat  # baseline is spatially uniform; fire events (P6) will not be
         cfg = self._config
         hour = (t_s / 3600.0) % 24.0
         diurnal = cos(2.0 * pi * (hour - cfg.temp_peak_hour) / 24.0)
@@ -76,14 +84,16 @@ class EnvironmentModel:
             + cfg.lapse_rate_c_per_km * (elevation_m - cfg.reference_elevation_m) / 1000.0
         )
         rh = _clamp(cfg.rh_mean_pct - cfg.rh_amplitude_pct * diurnal, 0.0, 100.0)
-        # Path 6 hook: fire events will perturb temp/smoke/rh here.
-        return Conditions(
+        conditions = Conditions(
             temp_c=temp,
             rh_pct=rh,
             smoke_ppm=cfg.smoke_baseline_ppm,
             wind_speed_ms=cfg.wind_speed_mean_ms,
             wind_dir_deg=cfg.wind_dir_mean_deg,
         )
+        for fire in self._fires:
+            conditions = fire.perturb(conditions, lon, lat, t_s)
+        return conditions
 
 
 def _clamp(value: float, low: float, high: float) -> float:
