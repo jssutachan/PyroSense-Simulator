@@ -52,16 +52,23 @@ flowchart LR
 | `publishers/stdout.py`, `publishers/file.py` | Transportes sin AWS: desarrollo y replay | ✅ |
 | `planner/terrain.py` | DEM → consultas de elevación y pendiente (normaliza a EPSG:4326) | ✅ |
 | `planner/zones.py` | Polígonos de prioridad T1/T2/T3 y clasificación de puntos | ✅ |
-| `planner/` (placement) | Elegir ubicaciones de sensores y emitir el plan | ⏳ Path 4 |
+| `planner/geo.py` | Conversión grados↔metros (única fuente de la aproximación) | ✅ |
+| `planner/placement.py` | Rejilla hexagonal por tier con jitter sembrado y reubicación por pendiente | ✅ |
+| `planner/gateways.py` | Clustering k-means de nodos y snap de gateways a terreno alto (solo metadato) | ✅ |
+| `planner/site_plan.py` | Ensambla el plan y serializa los 3 artefactos deterministas | ✅ |
+| `planner/params.py` / `planner/cli.py` | Configuración YAML validada en frontera + CLI typer (`site-planner`) | ✅ |
 | `fleet/` | Simular la flota: estado por nodo, señales ambientales, fallas | ⏳ Path 5 |
 
 ## Cómo fluyen los datos
 
-1. **Tiempo de planificación (una vez):** el site-planner carga un DEM real
+1. **Tiempo de planificación (una vez):** `site-planner generate` carga un DEM real
    (`TerrainModel` reproyecta a EPSG:4326 si hace falta), clasifica el área en tiers
-   (`ZoneSet`, con derivación por defecto documentada si no hay polígonos del usuario)
-   y —en el Path 4— produce un plan de despliegue GeoJSON: qué sensor va dónde, con
-   qué tier y qué gateway.
+   (`ZoneSet`, con derivación por defecto documentada si no hay polígonos del usuario),
+   coloca los nodos en rejilla hexagonal por densidad de tier (con jitter sembrado y
+   reubicación cuando la pendiente supera el umbral), agrupa gateways por k-means y
+   emite tres artefactos **deterministas** (misma semilla ⇒ bytes idénticos, ADR-0007):
+   `sensores.geojson` (la entrada del fleet-sim; esquema estable), `gateways.geojson`
+   y `site-report.md`.
 2. **Tiempo de simulación (continuo):** el fleet-sim lee ese plan, simula cada nodo y
    emite `TelemetryPayload` validados hacia un `Publisher` inyectado. Cambiar de
    "imprimir en pantalla" a "publicar a AWS IoT Core" es un cambio de wiring, no de código.

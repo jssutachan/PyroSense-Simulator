@@ -3,6 +3,26 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versionado alineado a hitos del proyecto. Una entrada por path completado.
 
+## [0.4.0] — Path 4: site-planner completo — 2026-07-07
+
+### Added
+- `HexGridPlacement` (tras el Protocol `PlacementStrategy`): rejilla hexagonal por
+  tier con espaciamiento derivado de densidad (T1 1/4 ha, T2 1/10 ha, T3 1/25 ha),
+  jitter sembrado ±25 m y reubicación contabilizada cuando la pendiente supera 45° —
+  nunca descartes silenciosos. Anemómetros a los sitios más altos (1/10 T1, 1/20 T2/T3).
+- `GatewayPlanner`: k-means numpy sembrado (`ceil(n/60)` clusters), snap al punto más
+  alto en 200 m, asignación por cercanía (`GW-##`). Metadato puro — ADR-0008.
+- `SitePlan`: ensamblaje con estrategia y planner inyectables; emite
+  `sensores.geojson` (esquema estable, entrada del Path 5), `gateways.geojson` y
+  `site-report.md`; salida **byte-determinista** por semilla — ADR-0007.
+- CLI `site-planner generate` (typer) con `--preview` PNG opcional (extra `preview`);
+  `config/params.example.yaml`; `PlannerParams` con validación fail-early del YAML.
+- `planner/geo.py`: conversión grados↔metros unificada.
+
+### Changed
+- `pyproject.toml`: entry point `site-planner`, extra `preview` (matplotlib),
+  `types-PyYAML` en dev.
+
 ## [Unreleased] — Consolidación P1–P3 (`chore/hardening-p1-p3`)
 
 ### Added

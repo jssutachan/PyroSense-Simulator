@@ -55,7 +55,24 @@ Para el site-planner necesitas un DEM real: sigue [data/README.md](data/README.m
 
 ## Uso
 
-Los CLIs `site-planner` y `fleet-sim` llegan con los Paths 4–5. Lo ya disponible:
+**Generar el plan de despliegue** (el CLI principal; `fleet-sim` llega con el Path 5):
+
+```bash
+# Con parámetros por defecto (T1 1/4ha, T2 1/10ha, T3 1/25ha, semilla 0):
+site-planner generate --dem data/dem_cerros_orientales.tif \
+    --aoi config/reserva.geojson --out out/
+
+# Con configuración propia y preview PNG (requiere: pip install "pyrosense-sim[preview]"):
+cp config/params.example.yaml config/params.yaml   # y ajusta densidades/semilla
+site-planner generate --dem data/dem_cerros_orientales.tif \
+    --aoi config/reserva.geojson --config config/params.yaml --out out/ --preview
+```
+
+Produce `out/sensores.geojson` (entrada del fleet-sim), `out/gateways.geojson` y
+`out/site-report.md` con densidades logradas, nodos reubicados por pendiente y la
+semilla usada. **Misma semilla + mismos insumos ⇒ salida byte-idéntica**
+([ADR-0007](docs/adr/ADR-0007-plan-determinista.md)); el AOI es un GeoJSON con el
+polígono del área (FeatureCollection, Feature o geometría directa).
 
 **Exportar el contrato como JSON Schema** (para el equipo cloud):
 
@@ -119,7 +136,7 @@ mkdocs serve                             # docs en http://127.0.0.1:8000
 ├── src/pyrosense_sim/
 │   ├── contracts/     # Payload v1 (pydantic) + exportador de JSON Schema — LA frontera
 │   ├── publishers/    # Protocol Publisher + stdout/file (NDJSON); MQTT llega después
-│   ├── planner/       # site-planner: TerrainModel (DEM) y ZoneSet (tiers)
+│   ├── planner/       # site-planner: terreno, zonas, placement, gateways, plan y CLI
 │   └── fleet/         # fleet-sim (Path 5)
 ├── tests/             # espeja src/; DEMs sintéticos, cero datos externos
 ├── docs/              # arquitectura, contrato, ADRs, contribución (sitio MkDocs)
@@ -142,4 +159,6 @@ Registradas como [ADRs](docs/adr/index.md): [dos programas](docs/adr/ADR-0001-do
 [Pydantic en frontera](docs/adr/ADR-0003-pydantic-frontera.md) ·
 [Git Flow](docs/adr/ADR-0004-git-flow.md) ·
 [el sensor no alerta](docs/adr/ADR-0005-sensor-no-alerta.md) ·
-[tooling](docs/adr/ADR-0006-tooling.md)
+[tooling](docs/adr/ADR-0006-tooling.md) ·
+[plan determinista](docs/adr/ADR-0007-plan-determinista.md) ·
+[gateways sin radio](docs/adr/ADR-0008-gateways-metadato.md)

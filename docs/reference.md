@@ -23,3 +23,17 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 ::: pyrosense_sim.planner.terrain
 
 ::: pyrosense_sim.planner.zones
+
+::: pyrosense_sim.planner.geo
+
+::: pyrosense_sim.planner.placement
+
+::: pyrosense_sim.planner.gateways
+
+::: pyrosense_sim.planner.site_plan
+
+::: pyrosense_sim.planner.params
+
+::: pyrosense_sim.planner.cli
+
+::: pyrosense_sim.planner.preview
