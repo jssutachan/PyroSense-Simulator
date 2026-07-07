@@ -32,9 +32,23 @@ class Zone:
 
 
 class ZoneSet:
-    """Collection of zones with point-in-zone tier lookup."""
+    """Collection of zones with point-in-zone tier lookup.
+
+    Example:
+        >>> from shapely.geometry import box
+        >>> zones = ZoneSet([Zone(box(0, 0, 1, 1), tier=1, zone_name="west")])
+        >>> zones.tier_of(0.5, 0.5)
+        1
+        >>> zones.tier_of(9.0, 9.0) is None
+        True
+    """
 
     def __init__(self, zones: Sequence[Zone]) -> None:
+        """Store the zones as an immutable tuple.
+
+        Args:
+            zones: Zones in any order; priority is resolved per query.
+        """
         self._zones = tuple(zones)
 
     @property
@@ -52,10 +66,18 @@ class ZoneSet:
         return f"ZoneSet({len(self._zones)} zones: {summary})"
 
     def tier_of(self, lon: float, lat: float) -> int | None:
-        """Tier at (lon, lat), or None outside every zone.
+        """Look up the priority tier at a point.
 
-        Where zones overlap, the highest priority (lowest tier number) wins.
-        Points on a zone boundary count as inside.
+        Where zones overlap, the highest priority (lowest tier number)
+        wins. Points on a zone boundary count as inside.
+
+        Args:
+            lon: Longitude in decimal degrees (EPSG:4326).
+            lat: Latitude in decimal degrees (EPSG:4326).
+
+        Returns:
+            The tier (1, 2 or 3), or ``None`` if the point lies outside
+            every zone.
         """
         point = Point(lon, lat)
         tiers = [zone.tier for zone in self._zones if zone.polygon.covers(point)]
@@ -65,8 +87,17 @@ class ZoneSet:
     def from_geojson(cls, path: Path | str) -> "ZoneSet":
         """Load zones from a GeoJSON FeatureCollection.
 
-        Each feature needs a Polygon/MultiPolygon geometry and properties
-        ``tier`` (1|2|3) and ``zone_name``.
+        Args:
+            path: GeoJSON file whose features carry a Polygon/MultiPolygon
+                geometry and properties ``tier`` (1|2|3) and ``zone_name``
+                (optional; a positional default is generated).
+
+        Returns:
+            A ZoneSet with one Zone per feature, in file order.
+
+        Raises:
+            ValueError: If a feature has a non-areal geometry or a tier
+                outside {1, 2, 3}.
         """
         collection = json.loads(Path(path).read_text(encoding="utf-8"))
         zones: list[Zone] = []
@@ -111,6 +142,19 @@ class ZoneSet:
 
         Buffers are computed in degrees with the equatorial meter/degree
         factor; at Bogota's latitude (~4.6 deg) the error is under 1%.
+
+        Args:
+            aoi: Area of interest polygon in EPSG:4326.
+            trails: Optional trail lines treated as human ignition
+                corridors (each gets the same T1/T2 buffers).
+            t1_buffer_m: Width of the T1 strip in meters.
+
+        Returns:
+            A ZoneSet with up to three zones named ``T1-derived``,
+            ``T2-derived`` and ``T3-derived`` (empty rings are dropped).
+
+        Raises:
+            ValueError: If ``t1_buffer_m`` is not positive.
         """
         if t1_buffer_m <= 0:
             msg = f"t1_buffer_m must be positive, got {t1_buffer_m}"

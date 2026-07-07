@@ -33,9 +33,25 @@ _WGS84 = CRS.from_epsg(4326)
 
 
 class TerrainModel:
-    """In-memory DEM in EPSG:4326 with point queries for elevation and slope."""
+    """In-memory DEM in EPSG:4326 with point queries for elevation and slope.
+
+    Example:
+        >>> terrain = TerrainModel("data/dem_cerros_orientales.tif")  # doctest: +SKIP
+        >>> terrain.elevation_at(-74.04, 4.61)  # doctest: +SKIP
+        3050.0
+    """
 
     def __init__(self, dem_path: Path | str) -> None:
+        """Load a DEM GeoTIFF fully into memory, normalizing to EPSG:4326.
+
+        Args:
+            dem_path: Path to a single-band, georeferenced GeoTIFF. Rasters
+                in other CRS are reprojected (bilinear) at load time.
+
+        Raises:
+            ValueError: If the raster has no CRS.
+            rasterio.errors.RasterioIOError: If the file cannot be opened.
+        """
         with rasterio.open(dem_path) as src:
             if src.crs is None:
                 msg = f"DEM {dem_path} has no CRS; a georeferenced GeoTIFF is required"
@@ -79,10 +95,18 @@ class TerrainModel:
         return self._bounds
 
     def elevation_at(self, lon: float, lat: float) -> float:
-        """Elevation in meters at (lon, lat).
+        """Sample the elevation at a point.
 
-        Raises ValueError if the point falls outside the DEM extent or on
-        a nodata cell.
+        Args:
+            lon: Longitude in decimal degrees (EPSG:4326).
+            lat: Latitude in decimal degrees (EPSG:4326).
+
+        Returns:
+            Elevation in meters at the DEM cell containing the point.
+
+        Raises:
+            ValueError: If the point falls outside the DEM extent (the
+                message includes the valid extent) or on a nodata cell.
         """
         row, col = self._cell_for(lon, lat)
         value = float(self._data[row, col])
@@ -92,10 +116,22 @@ class TerrainModel:
         return value
 
     def slope_at(self, lon: float, lat: float) -> float:
-        """Local slope in degrees at (lon, lat). See module docstring for the method.
+        """Compute the local slope at a point.
 
-        Raises ValueError if the point falls outside the DEM extent or the
-        neighbourhood contains nodata cells.
+        Uses central finite differences over the 4-connected cell
+        neighbourhood; see the module docstring for the full method.
+
+        Args:
+            lon: Longitude in decimal degrees (EPSG:4326).
+            lat: Latitude in decimal degrees (EPSG:4326).
+
+        Returns:
+            Slope in degrees: 0.0 is flat, 45.0 means 1 m of rise per
+            meter of horizontal distance.
+
+        Raises:
+            ValueError: If the point falls outside the DEM extent or its
+                neighbourhood contains nodata cells.
         """
         row, col = self._cell_for(lon, lat)
         north, south, west, east = self._neighbourhood(row, col)

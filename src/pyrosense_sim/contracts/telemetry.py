@@ -38,7 +38,27 @@ class DeviceStatus(StrEnum):
 
 
 class TelemetryPayload(BaseModel):
-    """Flat (non-nested) telemetry payload, contract v1."""
+    """Flat (non-nested) telemetry payload, contract v1.
+
+    Instances are immutable (``frozen``) and reject unknown fields
+    (``extra="forbid"``): a v1 producer can never silently emit something
+    a v1 consumer does not understand.
+
+    Example:
+        >>> from datetime import UTC, datetime
+        >>> payload = TelemetryPayload(
+        ...     device_id="PYRO-T1-0042",
+        ...     gateway_id="GW-01",
+        ...     ts_device=datetime(2026, 7, 7, 12, 30, tzinfo=UTC),
+        ...     seq=7,
+        ...     lat=4.6097, lon=-74.04, elevation_m=3050.0,
+        ...     temp_c=18.5, rh_pct=65.0, smoke_ppm=0.02,
+        ...     wind_speed_ms=None, wind_dir_deg=None,
+        ...     battery_pct=88.0, status=DeviceStatus.OK,
+        ... )
+        >>> payload.model_dump_json()[:31]
+        '{"schema_version":"1.0","device'
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
