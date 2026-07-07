@@ -40,6 +40,10 @@ dev = [
     "mypy>=1.13",
     "types-shapely>=2.0",
     "ruff>=0.8",
+    # <2: MkDocs 2.0 elimina el sistema de plugins (rompe material y mkdocstrings)
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
 ]
 
 # [project.scripts] se declarará en el Path 2, cuando existan los entry points

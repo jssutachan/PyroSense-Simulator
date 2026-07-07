@@ -1,0 +1,59 @@
+site_name: PyroSense Simulator
+site_description: Subsistema de simulación de PyroSense — detección temprana de incendios
+repo_url: https://github.com/jssutachan/PyroSense-Simulator
+repo_name: jssutachan/PyroSense-Simulator
+
+theme:
+  name: material
+  language: es
+  palette:
+    - scheme: default
+      primary: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Modo oscuro
+    - scheme: slate
+      primary: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Modo claro
+  features:
+    - navigation.sections
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - tables
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Inicio: index.md
+  - Arquitectura: architecture.md
+  - Contrato de datos: data-contract.md
+  - Referencia de API: reference.md
+  - Decisiones (ADRs):
+      - Índice: adr/index.md
+      - ADR-0001 Dos programas: adr/ADR-0001-dos-programas.md
+      - ADR-0002 Contrato primero: adr/ADR-0002-contrato-primero.md
+      - ADR-0003 Pydantic en frontera: adr/ADR-0003-pydantic-frontera.md
+      - ADR-0004 Git Flow simplificado: adr/ADR-0004-git-flow.md
+      - ADR-0005 El sensor no alerta: adr/ADR-0005-sensor-no-alerta.md
+      - ADR-0006 Tooling uv + src layout: adr/ADR-0006-tooling.md
+  - Guía de contribución: CONTRIBUTING.md
+  - Revisión de buenas prácticas: best-practices-review.md
