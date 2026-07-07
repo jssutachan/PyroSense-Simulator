@@ -94,6 +94,11 @@ class TerrainModel:
         """DEM extent as (min_lon, min_lat, max_lon, max_lat) in EPSG:4326."""
         return self._bounds
 
+    @property
+    def elevation_grid(self) -> npt.NDArray[np.float64]:
+        """The raw elevation raster (row 0 = north). Treat as read-only."""
+        return self._data
+
     def elevation_at(self, lon: float, lat: float) -> float:
         """Sample the elevation at a point.
 
