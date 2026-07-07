@@ -142,13 +142,18 @@ class FleetOrchestrator:
 
 
 def _load_nodes(site_path: Path, scenario: ScenarioConfig) -> list[SensorNode]:
-    """Instantiate the fleet from a sensores.geojson FeatureCollection."""
+    """Instantiate the fleet from a sensores.geojson FeatureCollection.
+
+    When the scenario sets ``load.fleet_multiplier > 1`` the fleet is
+    replicated with derived, contract-valid device ids (see
+    :func:`_replicate_specs`) to stress the pipeline without a bigger plan.
+    """
     collection = json.loads(Path(site_path).read_text(encoding="utf-8"))
     features = collection.get("features") or []
     if not features:
         msg = f"site plan {site_path} has no features; generate it with site-planner"
         raise ValueError(msg)
-    nodes: list[SensorNode] = []
+    specs: list[dict[str, object]] = []
     for feature in features:
         properties = feature.get("properties") or {}
         missing = [key for key in _REQUIRED_PROPERTIES if key not in properties]
@@ -160,18 +165,70 @@ def _load_nodes(site_path: Path, scenario: ScenarioConfig) -> list[SensorNode]:
         if tier not in (1, 2, 3):
             msg = f"feature {properties['device_id']} has invalid tier {tier!r}"
             raise ValueError(msg)
-        nodes.append(
-            SensorNode(
-                device_id=properties["device_id"],
-                gateway_id=properties["gateway_id"],
-                lon=float(lon),
-                lat=float(lat),
-                elevation_m=float(properties["elevation_m"]),
-                tier=cast(Tier, tier),
-                has_wind_sensor=bool(properties["has_wind_sensor"]),
-                config=scenario.node,
-                start_time=scenario.start_time,
-                seed=scenario.seed,
-            )
+        specs.append(
+            {
+                "device_id": properties["device_id"],
+                "gateway_id": properties["gateway_id"],
+                "lon": float(lon),
+                "lat": float(lat),
+                "elevation_m": float(properties["elevation_m"]),
+                "tier": tier,
+                "has_wind_sensor": bool(properties["has_wind_sensor"]),
+            }
         )
-    return nodes
+    specs = _replicate_specs(specs, scenario.load.fleet_multiplier)
+    return [
+        SensorNode(
+            device_id=cast(str, spec["device_id"]),
+            gateway_id=cast(str, spec["gateway_id"]),
+            lon=cast(float, spec["lon"]),
+            lat=cast(float, spec["lat"]),
+            elevation_m=cast(float, spec["elevation_m"]),
+            tier=cast(Tier, spec["tier"]),
+            has_wind_sensor=cast(bool, spec["has_wind_sensor"]),
+            config=scenario.node,
+            start_time=scenario.start_time,
+            seed=scenario.seed,
+        )
+        for spec in specs
+    ]
+
+
+def _replicate_specs(specs: list[dict[str, object]], multiplier: int) -> list[dict[str, object]]:
+    """Replicate the fleet for load testing with derived device ids.
+
+    Replica ``r`` of the node at per-tier position ``p`` gets serial
+    ``max_original_serial_of_tier * r + p``, which stays inside the
+    contract pattern ``PYRO-T{tier}-\\d{4}`` and never collides with the
+    originals. Positions and RNG streams derive from the new device_id,
+    so replicas emit independent (but reproducible) telemetry.
+
+    Raises:
+        ValueError: If a derived serial would exceed 9999 (the contract
+            id format is full for that tier).
+    """
+    if multiplier == 1:
+        return specs
+    max_serial: dict[object, int] = {}
+    position: list[int] = []
+    seen: dict[object, int] = {}
+    for spec in specs:
+        tier = spec["tier"]
+        serial = int(cast(str, spec["device_id"])[-4:])
+        max_serial[tier] = max(max_serial.get(tier, 0), serial)
+        seen[tier] = seen.get(tier, 0) + 1
+        position.append(seen[tier])
+
+    replicated = list(specs)
+    for replica in range(1, multiplier):
+        for spec, tier_position in zip(specs, position, strict=True):
+            tier = spec["tier"]
+            serial = max_serial[tier] * replica + tier_position
+            if serial > 9999:
+                msg = (
+                    f"fleet_multiplier={multiplier} overflows the 4-digit device_id "
+                    f"serial for tier {tier} (needs {serial})"
+                )
+                raise ValueError(msg)
+            replicated.append({**spec, "device_id": f"PYRO-T{tier}-{serial:04d}"})
+    return replicated

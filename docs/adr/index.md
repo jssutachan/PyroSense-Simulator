@@ -18,3 +18,4 @@ Un ADR no se edita para cambiar la decisión: se escribe uno nuevo que lo supers
 | [0010](ADR-0010-stdout-canal-de-datos.md) | stdout es el canal de datos; los logs van a stderr | Aceptado |
 | [0011](ADR-0011-fuego-parametrico.md) | Los eventos de fuego son interpolación paramétrica, no física | Aceptado |
 | [0012](ADR-0012-fallos-como-decorador.md) | Los fallos se inyectan en el flujo de mensajes, no en los nodos | Aceptado |
+| [0013](ADR-0013-qos1-dedupe-en-nube.md) | QoS 1 con deduplicación en la nube | Aceptado |

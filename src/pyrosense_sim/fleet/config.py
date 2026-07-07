@@ -143,6 +143,14 @@ class BatteryDecayConfig(BaseModel):
     degraded_pct: float = Field(default=10.0, ge=0.0, le=100.0)
 
 
+class LoadConfig(BaseModel):
+    """Load-test controls (E5): replicate the fleet to stress the pipeline."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    fleet_multiplier: int = Field(default=1, ge=1)
+
+
 class FaultsConfig(BaseModel):
     """Which faults the injector applies; ``None`` disables a fault."""
 
@@ -169,6 +177,7 @@ class ScenarioConfig(BaseModel):
     node: NodeConfig = NodeConfig()
     fires: list[FireEventConfig] = Field(default_factory=list)
     faults: FaultsConfig | None = None
+    load: LoadConfig = LoadConfig()
 
     @field_validator("start_time")
     @classmethod

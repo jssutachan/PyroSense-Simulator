@@ -61,5 +61,6 @@ nav:
       - ADR-0010 stdout canal de datos: adr/ADR-0010-stdout-canal-de-datos.md
       - ADR-0011 Fuego paramétrico: adr/ADR-0011-fuego-parametrico.md
       - ADR-0012 Fallos como decorador: adr/ADR-0012-fallos-como-decorador.md
+      - ADR-0013 QoS 1 y dedupe en nube: adr/ADR-0013-qos1-dedupe-en-nube.md
   - Guía de contribución: CONTRIBUTING.md
   - Revisión de buenas prácticas: best-practices-review.md

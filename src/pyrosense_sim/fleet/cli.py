@@ -32,10 +32,11 @@ app = typer.Typer(
 
 
 class PublisherKind(StrEnum):
-    """Available transports (MQTT/IoT Core arrives in Path 7)."""
+    """Available transports."""
 
     STDOUT = "stdout"
     FILE = "file"
+    MQTT = "mqtt"
 
 
 @app.callback()
@@ -77,6 +78,11 @@ def _build_publisher(kind: PublisherKind, out: Path) -> Publisher:
     if kind is PublisherKind.FILE:
         out.parent.mkdir(parents=True, exist_ok=True)
         return FilePublisher(out)
+    if kind is PublisherKind.MQTT:
+        # Lazy import: the offline transports never touch AWS code paths.
+        from pyrosense_sim.publishers.mqtt import MqttPublisher
+
+        return MqttPublisher()  # settings from env/.env; fails early if missing
     return StdoutPublisher()
 
 

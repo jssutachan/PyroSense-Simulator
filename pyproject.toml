@@ -92,9 +92,9 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-# rasterio y matplotlib no publican stubs completos; se aíslan aquí en vez de
-# relajar todo el proyecto
-module = ["rasterio.*", "matplotlib.*"]
+# rasterio, matplotlib y awsiotsdk no publican stubs completos; se aíslan aquí
+# en vez de relajar todo el proyecto
+module = ["rasterio.*", "matplotlib.*", "awscrt.*", "awsiot.*"]
 ignore_missing_imports = true
 
 # ─── pytest + cobertura ─────────────────────────────────────────────────
