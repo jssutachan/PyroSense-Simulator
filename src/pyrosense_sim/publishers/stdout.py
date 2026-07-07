@@ -4,6 +4,7 @@ import sys
 from typing import TextIO
 
 from pyrosense_sim.contracts.telemetry import TelemetryPayload
+from pyrosense_sim.publishers.ndjson import ndjson_line
 
 
 class StdoutPublisher:
@@ -17,7 +18,7 @@ class StdoutPublisher:
         self._stream = stream if stream is not None else sys.stdout
 
     def publish(self, payload: TelemetryPayload) -> None:
-        self._stream.write(payload.model_dump_json() + "\n")
+        self._stream.write(ndjson_line(payload))
         self._stream.flush()
 
     def close(self) -> None:

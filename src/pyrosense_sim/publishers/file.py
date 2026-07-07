@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TextIO
 
 from pyrosense_sim.contracts.telemetry import TelemetryPayload
+from pyrosense_sim.publishers.ndjson import ndjson_line
 
 
 class FilePublisher:
@@ -25,7 +26,7 @@ class FilePublisher:
         self._file: TextIO = self._path.open("a", encoding="utf-8")
 
     def publish(self, payload: TelemetryPayload) -> None:
-        self._file.write(payload.model_dump_json() + "\n")
+        self._file.write(ndjson_line(payload))
         self._file.flush()
         if self._file.tell() > self._max_bytes:
             self._rotate()
