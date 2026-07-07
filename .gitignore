@@ -34,3 +34,6 @@ data/*.zip
 .vscode/
 .idea/
 .DS_Store
+
+# ─── Documentos personales de aprendizaje (no son artefactos del proyecto) ───
+WINRY-BITACORA.md
