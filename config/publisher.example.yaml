@@ -1,0 +1,35 @@
+# ─────────────────────────────────────────────────────────────────────
+# Referencia de configuración de los tres publishers de fleet-sim.
+#
+# La SELECCIÓN del transporte se hace por CLI (`--publisher stdout|file|mqtt`);
+# este archivo documenta los knobs de cada uno y de dónde salen.
+# ─────────────────────────────────────────────────────────────────────
+
+stdout:
+  # Sin configuración: una línea NDJSON por payload al canal de datos
+  # (stdout); los logs van a stderr (ADR-0010). Ideal para pipes y desarrollo.
+
+file:
+  # Configurado por CLI:
+  #   --out out/telemetry.ndjson   (archivo destino; el directorio se crea)
+  # Rotación por tamaño: <archivo>.1, <archivo>.2, ... (1 MB por defecto).
+
+mqtt:
+  # Conexión: variables de entorno / .env (ver .env.example) — NUNCA en
+  # archivos versionados:
+  #   PYROSENSE_IOT_ENDPOINT        endpoint ATS de AWS IoT Core
+  #   PYROSENSE_CERT_PATH           certificado X.509 del dispositivo
+  #   PYROSENSE_PRIVATE_KEY_PATH    llave privada (jamás se loguea)
+  #   PYROSENSE_ROOT_CA_PATH        CA raíz de Amazon
+  #   PYROSENSE_TOPIC_BASE          default: pyrosense
+  #   PYROSENSE_ENV                 dev | staging | prod
+  #
+  # Topic resultante: {topic_base}/{env}/telemetry/{device_id} con QoS 1.
+  # Consecuencia at-least-once: la DEDUPLICACIÓN por device_id+seq es
+  # responsabilidad de la nube (ADR-0013).
+  #
+  # Comportamiento (defaults en código, inyectables):
+  #   max_retries: 5            reintentos por payload antes de descartar
+  #   base_backoff_s: 0.5       backoff exponencial + jitter
+  #   max_backoff_s: 30.0
+  #   metrics_interval_s: 30.0  log de métricas (enviados/fallidos/reintentos)

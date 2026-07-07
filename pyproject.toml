@@ -34,17 +34,26 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+preview = [
+    "matplotlib>=3.9",  # solo para --preview del site-planner
+]
 dev = [
+    "matplotlib>=3.9",      # los tests ejercitan --preview
+    "types-PyYAML>=6.0",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "mypy>=1.13",
     "types-shapely>=2.0",
     "ruff>=0.8",
+    # <2: MkDocs 2.0 elimina el sistema de plugins (rompe material y mkdocstrings)
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
 ]
 
-# [project.scripts] se declarará en el Path 2, cuando existan los entry points
-# reales de site-planner y fleet-sim. Declarar scripts hacia módulos inexistentes
-# instalaría binarios rotos.
+[project.scripts]
+site-planner = "pyrosense_sim.planner.cli:main"
+fleet-sim = "pyrosense_sim.fleet.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyrosense_sim"]
@@ -83,8 +92,9 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-# rasterio no publica stubs completos; se aísla aquí en vez de relajar todo el proyecto
-module = ["rasterio.*"]
+# rasterio, matplotlib y awsiotsdk no publican stubs completos; se aíslan aquí
+# en vez de relajar todo el proyecto
+module = ["rasterio.*", "matplotlib.*", "awscrt.*", "awsiot.*"]
 ignore_missing_imports = true
 
 # ─── pytest + cobertura ─────────────────────────────────────────────────

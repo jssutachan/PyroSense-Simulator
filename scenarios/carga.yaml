@@ -1,0 +1,37 @@
+# Escenario de carga (etapa E5): valida el throughput del pipeline cloud.
+#
+# Dos palancas combinadas:
+#   1. `load.fleet_multiplier: 5` — replica la flota 5x con device_ids
+#      derivados válidos contra el contrato (un plan de ~270 nodos se
+#      convierte en ~1350 dispositivos únicos).
+#   2. `node.t_normal_s: 60` — cadencia normal 5x más rápida (60 s vs 300 s).
+#
+# Efecto neto: ~25x el volumen de mensajes del baseline. Con
+# `--publisher mqtt` esto ejercita QoS 1 real contra IoT Core; con
+# `--publisher stdout` mide el techo del propio simulador.
+name: carga
+description: >
+  Flota multiplicada 5x con cadencia acelerada para estresar el pipeline
+  de ingesta. Operación sana (sin fuego ni fallos): el objetivo es medir
+  throughput, no confundir la señal.
+start_time: "2026-04-15T00:00:00Z"
+duration_hours: 1.0
+seed: 20260555
+
+environment: # línea base húmeda (idéntica a baseline.yaml)
+  temp_mean_c: 13.0
+  temp_amplitude_c: 5.0
+  temp_peak_hour: 14.0
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 85.0
+  rh_amplitude_pct: 10.0
+  wind_speed_mean_ms: 2.0
+  wind_dir_mean_deg: 100.0
+  smoke_baseline_ppm: 0.02
+
+node:
+  t_normal_s: 60.0 # cadencia acelerada para la prueba de carga
+
+load:
+  fleet_multiplier: 5

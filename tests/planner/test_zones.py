@@ -113,6 +113,16 @@ class TestDeriveDefault:
             ZoneSet.derive_default(self.AOI, t1_buffer_m=0.0)
 
 
+class TestContainerBehaviour:
+    def test_len_and_iter(self) -> None:
+        zones = make_zoneset()
+        assert len(zones) == 3
+        assert [zone.tier for zone in zones] == [1, 2, 3]
+
+    def test_repr_summarizes_zones(self) -> None:
+        assert repr(make_zoneset()) == "ZoneSet(3 zones: T1:west, T2:center, T3:overlap)"
+
+
 def test_as_areal_rejects_non_areal_geometry() -> None:
     with pytest.raises(TypeError, match="expected areal geometry"):
         _as_areal(LineString([(0, 0), (1, 1)]))
