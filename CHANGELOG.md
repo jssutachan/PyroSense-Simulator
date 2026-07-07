@@ -3,6 +3,22 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versionado alineado a hitos del proyecto. Una entrada por path completado.
 
+## [0.5.0] — Path 5: motor de flota baseline — 2026-07-07
+
+### Added
+- `fleet/config.py`: escenarios YAML validados con pydantic estricto (frontera de
+  usuario); escenarios `baseline.yaml` y `temporada_seca.yaml` (El Niño, sin fuego).
+- `EnvironmentModel`: verdad de terreno pura — ciclo diurno sinusoidal, lapse rate
+  −6.5 °C/km, humedad anticorrelacionada; hook para eventos de fuego (P6) — ADR-0009.
+- `SensorNode`: RNG propio por nodo (`seed:device_id`), `seq` monótono, batería con
+  drenaje temporal, `status` por umbrales, cadencia adaptativa 300 s → 30 s.
+- `Scheduler`: heap determinista (desempate por device_id) con reloj simulado y
+  `--speed`; sleep inyectable.
+- `FleetOrchestrator`: carga `sensores.geojson` validando propiedades, compone todo
+  vía DIP, SIGINT cierra limpio con resumen (emitidos, por status, duración sim/real).
+- CLI `fleet-sim run` (typer): stdout = datos NDJSON, stderr = logs — ADR-0010;
+  corre íntegramente sin credenciales AWS.
+
 ## [0.4.0] — Path 4: site-planner completo — 2026-07-07
 
 ### Added

@@ -57,5 +57,7 @@ nav:
       - ADR-0006 Tooling uv + src layout: adr/ADR-0006-tooling.md
       - ADR-0007 Plan determinista: adr/ADR-0007-plan-determinista.md
       - ADR-0008 Gateways sin radio: adr/ADR-0008-gateways-metadato.md
+      - ADR-0009 Ruido en el sensor: adr/ADR-0009-ruido-en-el-sensor.md
+      - ADR-0010 stdout canal de datos: adr/ADR-0010-stdout-canal-de-datos.md
   - Guía de contribución: CONTRIBUTING.md
   - Revisión de buenas prácticas: best-practices-review.md

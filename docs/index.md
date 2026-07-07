@@ -25,4 +25,5 @@ sensores simulados y la plataforma cloud.
 | 3 | Site-planner: modelo de terreno y zonas prioritarias | ✅ |
 | Consolidación | Git Flow, refactor de buenas prácticas, esta documentación | ✅ |
 | 4 | Site-planner completo: placement hexagonal, gateways, plan GeoJSON y CLI | ✅ |
-| 5+ | Fleet-sim: motor de simulación y publisher MQTT/IoT Core | ⏳ |
+| 5 | Fleet-sim: motor de flota baseline (ambiente, nodos, scheduler, CLI) | ✅ |
+| 6+ | Eventos de fuego/fallos; publisher MQTT/IoT Core y carga | ⏳ |

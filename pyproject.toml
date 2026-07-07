@@ -52,8 +52,8 @@ dev = [
 ]
 
 [project.scripts]
-# fleet-sim se declarará cuando exista su CLI real (Path 5).
 site-planner = "pyrosense_sim.planner.cli:main"
+fleet-sim = "pyrosense_sim.fleet.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyrosense_sim"]

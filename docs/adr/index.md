@@ -14,3 +14,5 @@ Un ADR no se edita para cambiar la decisión: se escribe uno nuevo que lo supers
 | [0006](ADR-0006-tooling.md) | Tooling: uv, src layout, mypy strict, cobertura con umbral vivo | Aceptado |
 | [0007](ADR-0007-plan-determinista.md) | El plan de despliegue es determinista por contrato | Aceptado |
 | [0008](ADR-0008-gateways-metadato.md) | Gateways como metadato: sin simulación de radio | Aceptado |
+| [0009](ADR-0009-ruido-en-el-sensor.md) | El ambiente es verdad de terreno; el ruido vive en el sensor | Aceptado |
+| [0010](ADR-0010-stdout-canal-de-datos.md) | stdout es el canal de datos; los logs van a stderr | Aceptado |
