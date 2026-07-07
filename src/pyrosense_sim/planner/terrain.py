@@ -98,21 +98,35 @@ class TerrainModel:
         neighbourhood contains nodata cells.
         """
         row, col = self._cell_for(lon, lat)
-        rows, cols = self._data.shape
-        north = self._data[max(row - 1, 0), col]
-        south = self._data[min(row + 1, rows - 1), col]
-        west = self._data[row, max(col - 1, 0)]
-        east = self._data[row, min(col + 1, cols - 1)]
-        if any(isnan(float(v)) for v in (north, south, east, west)):
+        north, south, west, east = self._neighbourhood(row, col)
+        if any(isnan(v) for v in (north, south, east, west)):
             msg = f"DEM has nodata cells around ({lon}, {lat}); slope is undefined there"
             raise ValueError(msg)
 
         xres_deg, yres_deg = abs(self._transform.a), abs(self._transform.e)
         xres_m = xres_deg * _M_PER_DEG_LON_AT_EQUATOR * cos(radians(lat))
         yres_m = yres_deg * _M_PER_DEG_LAT
-        dz_dx = (float(east) - float(west)) / (2.0 * xres_m)
-        dz_dy = (float(south) - float(north)) / (2.0 * yres_m)
+        dz_dx = (east - west) / (2.0 * xres_m)
+        dz_dy = (south - north) / (2.0 * yres_m)
         return degrees(atan(hypot(dz_dx, dz_dy)))
+
+    def __repr__(self) -> str:
+        rows, cols = self._data.shape
+        min_lon, min_lat, max_lon, max_lat = self._bounds
+        return (
+            f"TerrainModel({rows}x{cols} cells, "
+            f"lon [{min_lon:.4f}, {max_lon:.4f}], lat [{min_lat:.4f}, {max_lat:.4f}])"
+        )
+
+    def _neighbourhood(self, row: int, col: int) -> tuple[float, float, float, float]:
+        """Return (north, south, west, east) elevations, replicating borders at edges."""
+        rows, cols = self._data.shape
+        return (
+            float(self._data[max(row - 1, 0), col]),
+            float(self._data[min(row + 1, rows - 1), col]),
+            float(self._data[row, max(col - 1, 0)]),
+            float(self._data[row, min(col + 1, cols - 1)]),
+        )
 
     def _cell_for(self, lon: float, lat: float) -> tuple[int, int]:
         row, col = rowcol(self._transform, lon, lat)
