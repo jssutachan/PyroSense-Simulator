@@ -9,7 +9,7 @@ Coordinates are always EPSG:4326 lon/lat, matching the terrain model.
 """
 
 import json
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -40,6 +40,16 @@ class ZoneSet:
     @property
     def zones(self) -> tuple[Zone, ...]:
         return self._zones
+
+    def __len__(self) -> int:
+        return len(self._zones)
+
+    def __iter__(self) -> Iterator[Zone]:
+        return iter(self._zones)
+
+    def __repr__(self) -> str:
+        summary = ", ".join(f"T{zone.tier}:{zone.zone_name}" for zone in self._zones)
+        return f"ZoneSet({len(self._zones)} zones: {summary})"
 
     def tier_of(self, lon: float, lat: float) -> int | None:
         """Tier at (lon, lat), or None outside every zone.
