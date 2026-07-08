@@ -1,37 +1,38 @@
-# ADR-0004 — Git Flow simplificado
+# ADR-0004 — Simplified Git Flow
 
-**Estado:** Aceptado (Consolidación, 2026-07-07)
+**Status:** Accepted (2026-07-07)
 
-## Contexto
+## Context
 
-El proyecto se construye por paths incrementales, con un solo desarrollador (el
-arquitecto) asistido por IA, y el repo es evidencia de portafolio: la historia de Git
-debe contar el proceso de ingeniería con claridad.
+The project is built incrementally by a single developer assisted by AI, and
+the repository doubles as portfolio evidence: the Git history should tell the
+engineering story clearly.
 
-## Decisión
+## Decision
 
-Git Flow simplificado, sin ramas release/hotfix:
+Simplified Git Flow, without release/hotfix branches:
 
-- **`main`** — solo estados estables/entregables. Nunca se trabaja directo aquí.
-- **`develop`** — rama de integración; nace y muere cada feature aquí.
-- **`feature/<nombre-descriptivo>`** — una por path (`feature/path-4-site-planner-placement`);
-  nace de `develop`, se mergea a `develop` con `--no-ff` al completar y verificar.
-- **`chore/*`** — trabajos transversales (como esta consolidación), mismo ciclo.
-- Cuando un conjunto de paths forma un hito estable: `develop` → `main` con tag de
-  versión (p. ej. `v0.3-simulator-core`).
-- Conventional Commits atómicos; **nunca** `push --force` ni reescritura de historia
-  publicada.
+- **`main`** — stable/deliverable states only. Never worked on directly.
+- **`develop`** — integration branch; every feature starts and ends here.
+- **`feature/<descriptive-name>`** — one per feature; branched from
+  `develop`, merged back with `--no-ff` once complete and verified.
+- **`chore/*`** — cross-cutting work (refactors, documentation), same cycle.
+- When a set of features forms a stable milestone: `develop` → `main` with a
+  version tag.
+- Atomic Conventional Commits; **never** `push --force` or rewriting
+  published history.
 
-## Consecuencias
+## Consequences
 
-- Los merges `--no-ff` dejan visible el ciclo de cada feature en el grafo — legible
-  para un entrevistador.
-- `main` siempre es demoable.
-- Costo: más ceremonia que trunk-based; aceptable sin CI/CD maduro y con valor
-  didáctico de portafolio.
+- `--no-ff` merges keep each feature's cycle visible in the graph — readable
+  for a reviewer or interviewer.
+- `main` is always demoable.
+- Cost: more ceremony than trunk-based development; acceptable without mature
+  CI/CD, and valuable as portfolio storytelling.
 
-## Alternativas descartadas
+## Alternatives considered
 
-- **Trunk-based development**: óptimo con CI robusta y feature flags; excesivo de
-  prerequisitos para esta etapa (la pregunta de cuándo migrar queda abierta).
-- **Git Flow completo** (release/hotfix branches): ceremonia sin releases formales aún.
+- **Trunk-based development**: optimal with robust CI and feature flags; too
+  many prerequisites at this stage (when to migrate remains an open question).
+- **Full Git Flow** (release/hotfix branches): ceremony without formal
+  releases yet.
