@@ -55,8 +55,8 @@ def test_generate_writes_the_three_artifacts(inputs: dict[str, Path]) -> None:
         ],
     )
     assert result.exit_code == 0, result.output
-    assert "Plan generado" in result.output
-    for name in ("sensores.geojson", "gateways.geojson", "site-report.md"):
+    assert "Plan generated" in result.output
+    for name in ("sensors.geojson", "gateways.geojson", "site-report.md"):
         assert (inputs["out"] / name).exists()
 
 

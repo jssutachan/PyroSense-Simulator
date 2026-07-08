@@ -1,60 +1,73 @@
-# Guía de contribución y estándar de desarrollo
+# Contributing and development standard
 
-Este documento codifica el estándar obligatorio para **todo path futuro** del
-subsistema. Cada path nace cumpliéndolo — nada se "documenta después".
+This document codifies the standard for **all work** on the subsystem.
+Every change is born compliant — nothing gets "documented later".
 
-## Flujo de trabajo (Git)
+## Workflow (Git)
 
-1. Crear rama desde `develop`: `feature/<nombre-descriptivo>` para paths
-   (`feature/path-4-site-planner-placement`), `chore/<nombre>` para trabajo transversal.
-2. **Conventional Commits atómicos**: prefijo semántico (`feat:`, `fix:`, `refactor:`,
-   `test:`, `docs:`, `build:`, `chore:`, `style:`), asunto imperativo ≤ 50 caracteres sin
-   punto final, contexto en el cuerpo, referencia a issues/PRs cuando existan.
-   Un commit = un cambio lógico coherente (microcommits).
-3. Al completar y verificar: merge a `develop` con `--no-ff` (previa confirmación del
-   arquitecto). Hito estable = `develop` → `main` + tag (`v0.X-nombre`).
-4. Prohibido: `push --force`, borrar ramas o reescribir historia sin autorización explícita.
+1. Branch from `develop`: `feature/<descriptive-name>` for features,
+   `chore/<name>` for cross-cutting work.
+2. **Atomic Conventional Commits**: a semantic prefix (`feat:`, `fix:`,
+   `refactor:`, `test:`, `docs:`, `build:`, `chore:`, `style:`), an
+   imperative subject of at most 50 characters with no trailing period,
+   context in the body, and issue/PR references when they exist.
+   One commit = one coherent logical change.
+3. Once complete and verified: merge into `develop` with `--no-ff` (after
+   maintainer sign-off). A stable milestone = `develop` → `main` plus a
+   version tag.
+4. Forbidden: `push --force`, deleting branches, or rewriting history
+   without explicit authorization.
 
-## Código
+## Code
 
-- **Python ≥ 3.12**, entorno con `uv` (`uv venv --python 3.12 && uv pip install -e ".[dev]"`).
-- Type hints completos; `mypy --strict` limpio (aplica también a `tests/`).
-- **Pydantic solo en fronteras** del proceso; objetos internos con `@dataclass`
-  (frozen si son value objects) — ver [ADR-0003](adr/ADR-0003-pydantic-frontera.md).
-- Composición e inyección de dependencias sobre herencia; interfaces con `Protocol`.
-- Excepciones específicas con mensajes accionables; validar en los bordes, fallar temprano.
-- Cómputo puro separado de I/O; `logging` (no `print`) fuera de entry points CLI.
-- **Toda aleatoriedad con RNG inyectable y semilla configurable** (determinismo
-  reproducible; regirá el fleet-sim).
-- Cero secretos o rutas absolutas en el código; configuración vía `.env` (ignorado).
+- **Python ≥ 3.12**, environment managed with `uv`
+  (`uv venv --python 3.12 && uv pip install -e ".[dev]"`).
+- Complete type hints; `mypy --strict` clean (also applies to `tests/`).
+- **Pydantic only at process boundaries**; internal objects use
+  `@dataclass` (frozen when they are value objects) — see
+  [ADR-0003](adr/ADR-0003-pydantic-at-the-boundary.md).
+- Composition and dependency injection over inheritance; interfaces via
+  `Protocol`.
+- Specific exceptions with actionable messages; validate at the edges, fail
+  early.
+- Pure computation separated from I/O; `logging` (never `print`) outside CLI
+  entry points.
+- **All randomness through an injectable RNG with a configurable seed**
+  (reproducible determinism).
+- No secrets or absolute paths in code; configuration via `.env`
+  (git-ignored).
 
 ## Tests
 
-- `tests/` espeja `src/`; los datos de prueba se **generan sintéticamente** (nunca
-  archivos externos ni red).
-- Cobertura ≥ el umbral vigente de `pyproject.toml` (sube con el proyecto, no baja).
-- Warnings en tests = errores; toda excepción al filtro se documenta con su porqué.
+- `tests/` mirrors `src/`; test data is **generated synthetically** (never
+  external files or network access).
+- Coverage ≥ the current threshold in `pyproject.toml` (it rises with the
+  project, never falls).
+- Warnings in tests are errors; every filter exception is documented with
+  its reason.
 
-## Documentación (docs-as-code)
+## Documentation (docs-as-code)
 
-Obligatorio **en el mismo trabajo que el código** (mismo PR/rama, nunca "al final"):
+Mandatory **in the same change as the code** (same PR/branch, never "at the
+end"):
 
-- Docstrings **PEP 257 estilo Google** en todo lo público nuevo (`Args:`/`Returns:`/
-  `Raises:`/`Example:` cuando aporte); docstring de módulo en cada archivo nuevo.
-- Actualizar `README.md`, `docs/architecture.md` y `CHANGELOG.md` si el path cambia
-  lo que describen.
-- **Un ADR nuevo** (`docs/adr/ADR-XXXX-*.md`) si el path introduce una decisión de
-  arquitectura; los ADRs no se editan, se superseden.
-- Si cambia el contrato (solo por versión nueva): regenerar
-  `docs/payload-schema-v1.json` — el test anti-drift lo exige.
+- **PEP 257, Google-style docstrings** on all new public API (`Args:` /
+  `Returns:` / `Raises:` / `Example:` where it helps); a module docstring in
+  every new file.
+- Update `README.md`, `docs/architecture.md` and `CHANGELOG.md` whenever the
+  change affects what they describe.
+- **A new ADR** (`docs/adr/ADR-XXXX-*.md`) whenever the change introduces an
+  architecture decision; ADRs are never edited, they are superseded.
+- If the contract changes (only via a new version): regenerate
+  `docs/payload-schema-v1.json` — the anti-drift test demands it.
 
-## Verificación final (checklist antes de proponer merge)
+## Final verification (checklist before proposing a merge)
 
 ```bash
-ruff check . && ruff format --check .   # estilo
-mypy                                     # tipos (strict, src + tests)
-pytest                                   # tests + umbral de cobertura
-mkdocs build                             # la documentación construye
+ruff check . && ruff format --check .   # style
+mypy                                     # types (strict, src + tests)
+pytest                                   # tests + coverage threshold
+mkdocs build                             # documentation builds
 ```
 
-Los cuatro en verde o no hay merge.
+All four green, or there is no merge.

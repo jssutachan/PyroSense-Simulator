@@ -108,7 +108,7 @@ class TestEnvironmentIntegration:
 
 class TestMultiSensorCorrelation:
     def test_nearby_nodes_correlate_and_distant_ones_do_not(self, tmp_path: Path) -> None:
-        site = tmp_path / "sensores.geojson"
+        site = tmp_path / "sensors.geojson"
         features = []
         # Two nodes inside the fire, one 3 km east (well beyond the halo).
         positions = [EPICENTER, (EPICENTER[0] + 0.0005, EPICENTER[1]), (-74.02, 4.55)]

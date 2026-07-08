@@ -20,32 +20,31 @@ classifiers = [
     "Topic :: Scientific/Engineering :: GIS",
 ]
 
-# NOTE: contrastar contra la referencia global del proyecto antes del Path 2.
 dependencies = [
     "numpy>=2.0",
-    "rasterio>=1.4",          # lectura del DEM (GeoTIFF)
-    "shapely>=2.0",           # geometría (áreas candidatas, cobertura)
-    "pyproj>=3.7",            # transformaciones de CRS (WGS84 <-> MAGNA-SIRGAS / UTM)
-    "pydantic>=2.9",          # contratos de mensajes y validación
-    "pydantic-settings>=2.6", # configuración desde .env
-    "pyyaml>=6.0",            # escenarios y configuración declarativa
-    "typer>=0.15",            # CLIs: site-planner y fleet-sim
-    "awsiotsdk>=1.22",        # publicación MQTT hacia AWS IoT Core
+    "rasterio>=1.4",          # DEM (GeoTIFF) reading
+    "shapely>=2.0",           # geometry (candidate areas, coverage)
+    "pyproj>=3.7",            # CRS transformations (WGS84 <-> MAGNA-SIRGAS / UTM)
+    "pydantic>=2.9",          # message contracts and validation
+    "pydantic-settings>=2.6", # configuration from .env
+    "pyyaml>=6.0",            # scenarios and declarative configuration
+    "typer>=0.15",            # CLIs: site-planner and fleet-sim
+    "awsiotsdk>=1.22",        # MQTT publishing to AWS IoT Core
 ]
 
 [project.optional-dependencies]
 preview = [
-    "matplotlib>=3.9",  # solo para --preview del site-planner
+    "matplotlib>=3.9",  # only for the site-planner --preview
 ]
 dev = [
-    "matplotlib>=3.9",      # los tests ejercitan --preview
+    "matplotlib>=3.9",      # tests exercise --preview
     "types-PyYAML>=6.0",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "mypy>=1.13",
     "types-shapely>=2.0",
     "ruff>=0.8",
-    # <2: MkDocs 2.0 elimina el sistema de plugins (rompe material y mkdocstrings)
+    # <2: MkDocs 2.0 removes the plugin system (breaks material and mkdocstrings)
     "mkdocs>=1.6,<2",
     "mkdocs-material>=9.5",
     "mkdocstrings[python]>=0.27",
@@ -75,13 +74,13 @@ select = [
     "SIM", # flake8-simplify
     "C4",  # flake8-comprehensions
     "PT",  # flake8-pytest-style
-    "RUF", # reglas propias de ruff
+    "RUF", # ruff-specific rules
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"]  # assert es idiomático en pytest
+"tests/**" = ["S101"]  # assert is idiomatic in pytest
 
-# ─── mypy: modo estricto ────────────────────────────────────────────────
+# ─── mypy: strict mode ──────────────────────────────────────────────────
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 strict = true
@@ -92,25 +91,25 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-# rasterio, matplotlib y awsiotsdk no publican stubs completos; se aíslan aquí
-# en vez de relajar todo el proyecto
+# rasterio, matplotlib and awsiotsdk do not ship complete stubs; isolate them
+# here instead of relaxing the whole project
 module = ["rasterio.*", "matplotlib.*", "awscrt.*", "awsiot.*"]
 ignore_missing_imports = true
 
-# ─── pytest + cobertura ─────────────────────────────────────────────────
+# ─── pytest + coverage ──────────────────────────────────────────────────
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = [
     "--cov=src",
     "--cov-report=term-missing",
-    # Umbral vivo: se sube a medida que entra lógica real (meta final: >=85)
+    # Living threshold: raised as real logic lands (long-term goal: >=85)
     "--cov-fail-under=90",
     "--strict-markers",
 ]
 filterwarnings = [
     "error",
-    # rasterio (<=1.4) aún asigna ndarray.shape, deprecado en NumPy 2.5; issue upstream,
-    # revisar al actualizar rasterio
+    # rasterio (<=1.4) still assigns ndarray.shape, deprecated in NumPy 2.5;
+    # upstream issue, re-check when upgrading rasterio
     "ignore:Setting the shape on a NumPy array:DeprecationWarning",
 ]
 

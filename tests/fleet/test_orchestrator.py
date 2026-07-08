@@ -25,7 +25,7 @@ def short_scenario(seed: int = 5) -> ScenarioConfig:
 
 
 def run_to_string(tmp_path: Path, scenario: ScenarioConfig, node_count: int = 3) -> str:
-    site = write_site(tmp_path / "sensores.geojson", node_count)
+    site = write_site(tmp_path / "sensors.geojson", node_count)
     stream = io.StringIO()
     orchestrator = FleetOrchestrator.from_files(
         site, scenario, StdoutPublisher(stream=stream), sleep_fn=no_sleep
@@ -79,7 +79,7 @@ class TestDeterminism:
 
 class TestInterruption:
     def test_sigint_closes_cleanly_with_summary(self, tmp_path: Path) -> None:
-        site = write_site(tmp_path / "sensores.geojson")
+        site = write_site(tmp_path / "sensors.geojson")
 
         class InterruptingPublisher:
             def __init__(self) -> None:

@@ -1,11 +1,11 @@
-# ─── Secretos y credenciales — NUNCA versionar ───
+# ─── Secrets and credentials — NEVER commit ───
 .env
 *.pem
 *.key
 *.crt
 certs/
 
-# ─── Artefactos de ejecución ───
+# ─── Runtime artifacts ───
 out/
 *.log
 
@@ -18,25 +18,25 @@ build/
 .venv/
 venv/
 
-# ─── Sitio de documentación generado (mkdocs build) ───
+# ─── Generated documentation site (mkdocs build) ───
 site/
 
-# ─── Caches de tooling ───
+# ─── Tooling caches ───
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 htmlcov/
 
-# ─── Datos geoespaciales pesados (ver data/README.md) ───
+# ─── Heavy geospatial data (see data/README.md) ───
 data/*.tif
 data/*.tiff
 data/*.zip
 
-# ─── IDE / SO ───
+# ─── IDE / OS ───
 .vscode/
 .idea/
 .DS_Store
 
-# ─── Documentos personales de aprendizaje (no son artefactos del proyecto) ───
+# ─── Personal learning notes (not project artifacts) ───
 WINRY-BITACORA.md

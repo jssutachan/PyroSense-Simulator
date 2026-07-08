@@ -6,7 +6,7 @@ NDJSON to **stdout** (the data channel) while logs go to **stderr**, so
 (ADR-0010).
 
 Example:
-    fleet-sim run --site out/sensores.geojson \\
+    fleet-sim run --site out/sensors.geojson \\
         --scenario scenarios/baseline.yaml --publisher stdout --speed 60
 """
 
@@ -26,7 +26,7 @@ from pyrosense_sim.publishers.stdout import StdoutPublisher
 
 app = typer.Typer(
     name="fleet-sim",
-    help="Simula la flota de sensores PyroSense y publica su telemetría.",
+    help="Simulate the PyroSense sensor fleet and publish its telemetry.",
     no_args_is_help=True,
 )
 
@@ -41,24 +41,27 @@ class PublisherKind(StrEnum):
 
 @app.callback()
 def _root() -> None:
-    """Fleet-sim de PyroSense: del plan de despliegue a la telemetría."""
+    """PyroSense fleet simulator: from a deployment plan to telemetry."""
 
 
 @app.command()
 def run(
     site: Annotated[
         Path,
-        typer.Option(exists=True, dir_okay=False, help="sensores.geojson del site-planner."),
+        typer.Option(exists=True, dir_okay=False, help="sensors.geojson produced by site-planner."),
     ],
-    scenario: Annotated[Path, typer.Option(exists=True, dir_okay=False, help="Escenario YAML.")],
+    scenario: Annotated[Path, typer.Option(exists=True, dir_okay=False, help="Scenario YAML.")],
     publisher: Annotated[
-        PublisherKind, typer.Option(help="Transporte de salida.")
+        PublisherKind, typer.Option(help="Output transport.")
     ] = PublisherKind.STDOUT,
     out: Annotated[
-        Path, typer.Option(help="Archivo NDJSON destino (solo --publisher file).")
+        Path, typer.Option(help="Destination NDJSON file (only with --publisher file).")
     ] = Path("out/telemetry.ndjson"),
     speed: Annotated[
-        float, typer.Option(min=0.000001, help="Factor de aceleración (60 = 1 h sim/min real).")
+        float,
+        typer.Option(
+            min=0.000001, help="Time acceleration factor (60 = 1 simulated hour per real minute)."
+        ),
     ] = 60.0,
 ) -> None:
     """Run a scenario against the planned fleet until its horizon (or Ctrl-C)."""

@@ -1,1 +1,1 @@
-"""Site-planner: sensor placement over the DEM (populated in later paths)."""
+"""Site planner: turns a DEM and priority zones into a sensor deployment plan."""

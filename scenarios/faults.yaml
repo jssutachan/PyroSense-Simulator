@@ -1,0 +1,44 @@
+# Fault-injection scenario: stresses the pipeline with the real-world
+# pathologies of a field IoT network. The FaultInjector wraps the message
+# stream (ADR-0012) — the nodes stay healthy; it is the network and the
+# field that misbehave. The `faults:` block is composable: copy it onto
+# baseline or january_2024_replay to combine fire and faults.
+name: faults
+description: >
+  Operation over a degraded network: nodes going silent in intervals, a
+  whole gateway disconnecting for 3 hours and replaying its backlog in a
+  burst with old timestamps, QoS 1 duplicates, local reordering, and
+  batteries draining at an accelerated rate.
+start_time: "2026-04-15T00:00:00Z"
+duration_hours: 24.0
+seed: 20260415
+
+environment: # wet-season baseline (identical to baseline.yaml)
+  temp_mean_c: 13.0
+  temp_amplitude_c: 5.0
+  temp_peak_hour: 14.0
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 85.0
+  rh_amplitude_pct: 10.0
+  wind_speed_mean_ms: 2.0
+  wind_dir_mean_deg: 100.0
+  smoke_baseline_ppm: 0.02
+
+faults:
+  node_dropout: # 15% of nodes go silent 10 min out of every hour
+    fraction: 0.15
+    period_min: 60.0
+    window_min: 10.0
+  burst_reconnect: # all of GW-01 offline from 02:00 to 05:00;
+    gateway_id: GW-01 #   on reconnection, burst replay with ORIGINAL ts_device
+    offline_from_hour: 2.0
+    offline_hours: 3.0
+  duplicates: # MQTT QoS 1 at-least-once re-delivery
+    probability: 0.05
+  out_of_order: # local permutation within 4-message windows
+    window: 4
+  battery_decay: # accelerated drain -> LOW_BATTERY/DEGRADED
+    extra_pct_per_day: 120.0
+    low_pct: 20.0
+    degraded_pct: 10.0
