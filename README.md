@@ -1,45 +1,48 @@
 # PyroSense Simulator
 
-**Simula la flota de sensores IoT que detecta incendios forestales antes de que sean
-noticia** — el subsistema de simulación de PyroSense, una plataforma serverless en AWS
-de detección temprana, motivada por los incendios de los Cerros Orientales de Bogotá
-de enero de 2024, cuando la detección tardía dejó a la ciudad días bajo el humo.
+**Simulates the IoT sensor fleet that detects wildfires before they make the
+news** — the simulation subsystem of PyroSense, a serverless AWS platform for
+early wildfire detection, motivated by the January 2024 fires in Bogotá's
+Cerros Orientales, when late detection left the city under smoke for days.
 
-Este repo responde dos preguntas por software, antes de comprar un solo sensor:
-**¿dónde ubicar los nodos?** (site-planner, sobre un modelo digital de elevación real)
-y **¿cómo se comporta la plataforma con tráfico de flota realista?** (fleet-sim, que
-emite telemetría validada por contrato). La infraestructura AWS vive en su propio repositorio.
+This repository answers two questions in software, before buying a single
+sensor: **where should the nodes go?** (site-planner, over a real digital
+elevation model) and **how does the platform behave under realistic fleet
+traffic?** (fleet-sim, which emits contract-validated telemetry). The AWS
+infrastructure lives in its own repository.
 
-## Arquitectura
+## Architecture
 
 ```mermaid
 flowchart LR
-    subgraph offline["site-planner (offline, corre una vez)"]
+    subgraph offline["site-planner (offline, runs once)"]
         DEM["DEM GeoTIFF<br/>IGAC / Copernicus"] --> TM[TerrainModel]
-        GJ["Zonas GeoJSON<br/>(opcional)"] --> ZS[ZoneSet]
-        TM --> PL["Placement (Path 4)"]
+        GJ["Zones GeoJSON<br/>(optional)"] --> ZS[ZoneSet]
+        TM --> PL["Placement"]
         ZS --> PL
-        PL --> PLAN["Plan de despliegue<br/>GeoJSON"]
+        PL --> PLAN["Deployment plan<br/>GeoJSON"]
     end
 
     subgraph online["fleet-sim (long-running)"]
-        PLAN --> FE["Motor de flota (Path 5)"]
-        FE --> TP["TelemetryPayload v1<br/>contrato congelado"]
+        PLAN --> FE["Fleet engine"]
+        FE --> TP["TelemetryPayload v1<br/>frozen contract"]
         TP --> PUB{Publisher}
     end
 
-    PUB -->|stdout NDJSON| DEV[Desarrollo local]
+    PUB -->|stdout NDJSON| DEV[Local development]
     PUB -->|file NDJSON| REPLAY[Replay]
-    PUB -->|"MQTT/TLS (futuro)"| AWS["AWS IoT Core → Lambda"]
+    PUB -->|"MQTT/TLS"| AWS["AWS IoT Core → Lambda"]
 ```
 
-La frontera entre este subsistema y la nube es el **[contrato de datos v1](docs/data-contract.md)**:
-un payload pydantic congelado, exportado como [JSON Schema](docs/payload-schema-v1.json)
-y protegido por un test anti-drift.
+The boundary between this subsystem and the cloud is the
+**[v1 data contract](docs/data-contract.md)**: a frozen pydantic payload,
+exported as [JSON Schema](docs/payload-schema-v1.json) and guarded by an
+anti-drift test.
 
-## Requisitos e instalación
+## Requirements and installation
 
-Python ≥ 3.12. Recomendado con [uv](https://docs.astral.sh/uv/) (gestiona el intérprete solo):
+Python ≥ 3.12. Recommended with [uv](https://docs.astral.sh/uv/) (it manages
+the interpreter itself):
 
 ```bash
 git clone git@github.com:jssutachan/PyroSense-Simulator.git
@@ -47,75 +50,76 @@ cd PyroSense-Simulator
 uv venv --python 3.12
 source .venv/bin/activate
 uv pip install -e ".[dev]"
-cp .env.example .env        # placeholders; los valores reales nunca se versionan
+cp .env.example .env        # placeholders; real values are never committed
 ```
 
-Para el site-planner necesitas un DEM real: sigue [data/README.md](data/README.md)
-(IGAC "Colombia en Mapas" o Copernicus GLO-30 vía OpenTopography).
+The site-planner needs a real DEM: follow [data/README.md](data/README.md)
+(IGAC "Colombia en Mapas" or Copernicus GLO-30 via OpenTopography).
 
-## Uso
+## Usage
 
-**Generar el plan de despliegue** (el CLI principal; `fleet-sim` llega con el Path 5):
+**Generate the deployment plan:**
 
 ```bash
-# Con parámetros por defecto (T1 1/4ha, T2 1/10ha, T3 1/25ha, semilla 0):
+# With reasoned defaults (T1 1 node/4 ha, T2 1/10 ha, T3 1/25 ha, seed 0):
 site-planner generate --dem data/dem_cerros_orientales.tif \
-    --aoi config/reserva.geojson --out out/
+    --aoi config/reserve.geojson --out out/
 
-# Con configuración propia y preview PNG (requiere: pip install "pyrosense-sim[preview]"):
-cp config/params.example.yaml config/params.yaml   # y ajusta densidades/semilla
+# With custom parameters and a PNG preview (pip install "pyrosense-sim[preview]"):
+cp config/params.example.yaml config/params.yaml   # adjust densities/seed
 site-planner generate --dem data/dem_cerros_orientales.tif \
-    --aoi config/reserva.geojson --config config/params.yaml --out out/ --preview
+    --aoi config/reserve.geojson --config config/params.yaml --out out/ --preview
 ```
 
-Produce `out/sensores.geojson` (entrada del fleet-sim), `out/gateways.geojson` y
-`out/site-report.md` con densidades logradas, nodos reubicados por pendiente y la
-semilla usada. **Misma semilla + mismos insumos ⇒ salida byte-idéntica**
-([ADR-0007](docs/adr/ADR-0007-plan-determinista.md)); el AOI es un GeoJSON con el
-polígono del área (FeatureCollection, Feature o geometría directa).
+This produces `out/sensors.geojson` (the fleet simulator's input),
+`out/gateways.geojson` and `out/site-report.md` with achieved densities,
+slope-relocated nodes and the seed used. **Same seed + same inputs ⇒
+byte-identical output** ([ADR-0007](docs/adr/ADR-0007-deterministic-plan.md));
+the AOI is a GeoJSON polygon (FeatureCollection, Feature or bare geometry).
 
-**Simular la flota** (sin ninguna credencial ni conexión AWS):
+**Simulate the fleet** (no AWS credentials or connectivity required):
 
 ```bash
-# 24 h del escenario base a 1 h simulada por minuto real, NDJSON a stdout:
-fleet-sim run --site out/sensores.geojson --scenario scenarios/baseline.yaml \
+# 24 h of the baseline scenario at 1 simulated hour per real minute, NDJSON to stdout:
+fleet-sim run --site out/sensors.geojson --scenario scenarios/baseline.yaml \
     --publisher stdout --speed 60 > telemetry.ndjson
 
-# Temporada seca estilo El Niño, a archivo con rotación:
-fleet-sim run --site out/sensores.geojson --scenario scenarios/temporada_seca.yaml \
+# El Niño dry season, to a size-rotated file:
+fleet-sim run --site out/sensors.geojson --scenario scenarios/dry_season.yaml \
     --publisher file --out out/telemetry.ndjson --speed 3600
 
-# Replay paramétrico del incendio de enero 2024 (correlación multi-sensor):
-fleet-sim run --site out/sensores.geojson --scenario scenarios/replay_enero_2024.yaml \
+# Parametric replay of the January 2024 fire (multi-sensor correlation):
+fleet-sim run --site out/sensors.geojson --scenario scenarios/january_2024_replay.yaml \
     --publisher stdout --speed 600
 
-# Red degradada: dropout, ráfaga de reconexión con timestamps viejos,
-# duplicados QoS 1, desorden y baterías cayendo:
-fleet-sim run --site out/sensores.geojson --scenario scenarios/fallos.yaml \
+# Degraded network: dropouts, reconnection burst with old timestamps,
+# QoS 1 duplicates, reordering and draining batteries:
+fleet-sim run --site out/sensors.geojson --scenario scenarios/faults.yaml \
     --publisher stdout --speed 600
 
-# Prueba de carga (~25x el volumen del baseline: flota 5x + cadencia 60 s):
-fleet-sim run --site out/sensores.geojson --scenario scenarios/carga.yaml \
-    --publisher stdout --speed 3600 > /dev/null   # medir con los logs de stderr
+# Load test (~25x baseline volume: 5x fleet + 60 s cadence):
+fleet-sim run --site out/sensors.geojson --scenario scenarios/load_test.yaml \
+    --publisher stdout --speed 3600 > /dev/null   # measure via the stderr logs
 
-# Hacia AWS IoT Core (cuando exista la etapa E2): TLS mutua + QoS 1;
-# credenciales SIEMPRE por .env (ver .env.example y config/publisher.example.yaml):
-fleet-sim run --site out/sensores.geojson --scenario scenarios/baseline.yaml \
+# Toward AWS IoT Core: mutual TLS + QoS 1; credentials ALWAYS via .env
+# (see .env.example and config/publisher.example.yaml):
+fleet-sim run --site out/sensors.geojson --scenario scenarios/baseline.yaml \
     --publisher mqtt --speed 60
 ```
 
-Los datos van por stdout y los logs por stderr ([ADR-0010](docs/adr/ADR-0010-stdout-canal-de-datos.md)),
-así que los pipes quedan limpios. Ctrl-C cierra ordenado con resumen (total emitido,
-desglose por status, duración simulada vs real). Misma semilla de escenario ⇒ misma
-secuencia exacta de payloads.
+Data flows through stdout and logs through stderr
+([ADR-0010](docs/adr/ADR-0010-stdout-data-channel.md)), so pipes stay clean.
+Ctrl-C shuts down cleanly with a summary (total emitted, per-status
+breakdown, simulated vs real duration). The same scenario seed reproduces
+the exact same payload sequence.
 
-**Exportar el contrato como JSON Schema** (para el equipo cloud):
+**Export the contract as JSON Schema** (for the cloud team):
 
 ```bash
 python -m pyrosense_sim.contracts.export_schema > docs/payload-schema-v1.json
 ```
 
-**Consultar un DEM desde Python:**
+**Query a DEM from Python:**
 
 ```python
 from pyrosense_sim.planner.terrain import TerrainModel
@@ -126,18 +130,18 @@ print(terrain.elevation_at(-74.04, 4.61), "m")
 print(terrain.slope_at(-74.04, 4.61), "deg")
 ```
 
-**Clasificar puntos por zona de prioridad:**
+**Classify points by priority zone:**
 
 ```python
 from shapely.geometry import box
 from pyrosense_sim.planner.zones import ZoneSet
 
 aoi = box(-74.10, 4.50, -74.00, 4.60)
-zones = ZoneSet.derive_default(aoi)     # T1 = interfaz urbana occidental (simplificación documentada)
+zones = ZoneSet.derive_default(aoi)     # T1 = western wildland-urban interface
 print(zones.tier_of(-74.099, 4.55))     # 1
 ```
 
-**Emitir telemetría validada a NDJSON:**
+**Emit validated telemetry as NDJSON:**
 
 ```python
 from datetime import UTC, datetime
@@ -155,64 +159,69 @@ payload = TelemetryPayload(
 StdoutPublisher().publish(payload)
 ```
 
-**Verificación de calidad** (la checklist completa está en [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)):
+**Quality checks** (the full checklist lives in
+[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)):
 
 ```bash
-ruff check . && ruff format --check .   # estilo
-mypy                                     # tipos (strict, src + tests)
-pytest                                   # tests + cobertura (umbral 90, real 100 %)
-mkdocs build                             # documentación
-mkdocs serve                             # docs en http://127.0.0.1:8000
+ruff check . && ruff format --check .   # style
+mypy                                     # types (strict, src + tests)
+pytest                                   # tests + coverage threshold
+mkdocs build                             # documentation
+mkdocs serve                             # docs at http://127.0.0.1:8000
 ```
 
-## Estructura del repositorio
+## Repository layout
 
 ```
 ├── src/pyrosense_sim/
-│   ├── contracts/     # Payload v1 (pydantic) + exportador de JSON Schema — LA frontera
-│   ├── publishers/    # Protocol Publisher + stdout/file (NDJSON) + MQTT (IoT Core, QoS 1)
-│   ├── planner/       # site-planner: terreno, zonas, placement, gateways, plan y CLI
-│   └── fleet/         # fleet-sim: escenario, ambiente, nodos, scheduler y CLI
-├── tests/             # espeja src/; DEMs sintéticos, cero datos externos
-├── docs/              # arquitectura, contrato, ADRs, contribución (sitio MkDocs)
-├── config/            # configuración de los programas
-├── scenarios/         # escenarios de simulación declarativos
-└── data/              # DEM real (no versionado) + guía de descarga
+│   ├── contracts/     # v1 payload (pydantic) + JSON Schema exporter — THE boundary
+│   ├── publishers/    # Publisher protocol + stdout/file (NDJSON) + MQTT (IoT Core, QoS 1)
+│   ├── planner/       # site-planner: terrain, zones, placement, gateways, plan, CLI
+│   └── fleet/         # fleet-sim: scenarios, environment, nodes, fire, faults, CLI
+├── tests/             # mirrors src/; synthetic DEMs, zero external data
+├── docs/              # architecture, contract, ADRs, contributing (MkDocs site)
+├── config/            # program configuration and examples
+├── scenarios/         # declarative simulation scenarios
+└── data/              # real DEM (not committed) + download guide
 ```
 
-## Documentación
+## Documentation
 
-- **[Guía de arquitectura](docs/architecture.md)** — el diseño completo en 10 minutos.
-- **[Contrato de datos v1](docs/data-contract.md)** — campo por campo, con su porqué.
-- **[Referencia de API](docs/reference.md)** — generada desde docstrings (`mkdocs serve`).
-- **[CHANGELOG](CHANGELOG.md)** — una entrada por path.
+- **[Architecture guide](docs/architecture.md)** — the full design in 10 minutes.
+- **[Data contract v1](docs/data-contract.md)** — field by field, with the why.
+- **[API reference](docs/reference.md)** — generated from docstrings (`mkdocs serve`).
+- **[CHANGELOG](CHANGELOG.md)** — one entry per release.
 
-## Las 5 decisiones de diseño (y su porqué)
+## The 5 design decisions (and why)
 
-1. **Dos programas, no uno** — planificar (offline, geoespacial-pesado, corre una
-   vez) y simular (long-running, I/O-pesado) tienen ciclos de vida y dependencias
-   distintos; el plan GeoJSON intermedio es inspeccionable, versionable y editable
-   entre etapas → [ADR-0001](docs/adr/ADR-0001-dos-programas.md).
-2. **QoS 1 con deduplicación en la nube** — perder lecturas es inaceptable y
-   exactly-once no existe en IoT Core; el payload carga `device_id`+`seq` desde el
-   día uno para que la Lambda sea idempotente. El simulador entrena esa
-   responsabilidad con el fallo `duplicates` → [ADR-0013](docs/adr/ADR-0013-qos1-dedupe-en-nube.md).
-3. **La frecuencia adaptativa es el origen del patrón de ráfaga** — un nodo que ve
-   condiciones elevadas pasa de 300 s a 30 s por sí solo; un incendio real produce
-   entonces una ráfaga espacialmente correlacionada de mensajes (verificado: los
-   nodos en zona de fuego emiten 4–6× más). El pipeline debe dimensionarse para
-   ese pico, no para el promedio — y el escenario `carga.yaml` lo estresa a
-   propósito.
-4. **El gateway es metadato: no se simula radio** — `ceil(n/60)` clusters k-means
-   con snap a terreno alto dan el `gateway_id` que el payload necesita, sin
-   desviar el proyecto a un problema de RF que no es su objetivo →
-   [ADR-0008](docs/adr/ADR-0008-gateways-metadato.md).
-5. **Cero física de fuego, deliberadamente** — `FireEvent` es interpolación
-   paramétrica (círculo + viento + rampa suave) que produce la *firma* multi-sensor
-   que la detección necesita; Rothermel/FARSITE exigirían datos que no existen y
-   no mejorarían la validación del pipeline →
-   [ADR-0011](docs/adr/ADR-0011-fuego-parametrico.md).
+1. **Two programs, not one** — planning (offline, geospatial-heavy, runs
+   once) and simulating (long-running, I/O-heavy) have different life cycles
+   and dependencies; the intermediate GeoJSON plan is inspectable,
+   versionable and editable between stages →
+   [ADR-0001](docs/adr/ADR-0001-two-programs.md).
+2. **QoS 1 with deduplication in the cloud** — losing readings is
+   unacceptable and exactly-once does not exist in IoT Core; the payload
+   carries `device_id`+`seq` from day one so the ingestion Lambda can be
+   idempotent. The simulator trains that responsibility with the
+   `duplicates` fault →
+   [ADR-0013](docs/adr/ADR-0013-qos1-dedupe-in-the-cloud.md).
+3. **Adaptive sampling is the origin of the burst pattern** — a node seeing
+   elevated conditions switches from 300 s to 30 s on its own; a real fire
+   therefore produces a spatially correlated burst of messages (verified:
+   nodes inside the fire zone emit 4–6x more). The pipeline must be sized
+   for that peak, not the average — and `scenarios/load_test.yaml` stresses
+   it on purpose.
+4. **Gateways are metadata: no radio simulation** — `ceil(n/60)` k-means
+   clusters snapped to high ground provide the `gateway_id` the payload
+   needs, without derailing the project into an RF problem outside its
+   goal → [ADR-0008](docs/adr/ADR-0008-gateways-as-metadata.md).
+5. **Deliberately no fire physics** — `FireEvent` is parametric
+   interpolation (circle + wind drift + smooth ramp) producing the
+   multi-sensor *signature* detection needs; Rothermel/FARSITE would demand
+   data that doesn't exist and wouldn't improve pipeline validation →
+   [ADR-0011](docs/adr/ADR-0011-parametric-fire.md).
 
-El registro completo (13 decisiones): [ADRs](docs/adr/index.md) — contrato
-congelado, Pydantic-frontera, Git Flow, sensor-no-alerta, tooling, plan
-determinista, ruido-en-el-sensor, stdout-canal-de-datos, fallos-como-decorador.
+The full record (13 decisions): [ADRs](docs/adr/index.md) — frozen contract,
+pydantic at the boundary, Git Flow, sensors-report-health, tooling,
+deterministic plan, noise-in-the-sensor, stdout-as-data-channel,
+faults-as-decorator.
