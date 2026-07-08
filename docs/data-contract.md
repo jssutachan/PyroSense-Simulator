@@ -1,12 +1,14 @@
-# Contrato de datos — Telemetría v1
+# Data contract — Telemetry v1
 
-El payload de telemetría es **el acuerdo congelado** entre los sensores (simulados o
-reales) y la plataforma cloud. Modelo fuente: `pyrosense_sim.contracts.telemetry.TelemetryPayload`.
-Schema machine-readable: [`payload-schema-v1.json`](payload-schema-v1.json)
-(regenerable con `python -m pyrosense_sim.contracts.export_schema > docs/payload-schema-v1.json`;
-un test anti-drift garantiza que nunca quede desactualizado).
+The telemetry payload is **the frozen agreement** between the sensors
+(simulated or real) and the cloud platform. Source model:
+`pyrosense_sim.contracts.telemetry.TelemetryPayload`.
+Machine-readable schema: [`payload-schema-v1.json`](payload-schema-v1.json)
+(regenerate with
+`python -m pyrosense_sim.contracts.export_schema > docs/payload-schema-v1.json`;
+an anti-drift test guarantees it never goes stale).
 
-## Ejemplo
+## Example
 
 ```json
 {
@@ -28,30 +30,31 @@ un test anti-drift garantiza que nunca quede desactualizado).
 }
 ```
 
-## Campo por campo
+## Field by field
 
-| Campo | Tipo | Regla de validación | Por qué existe |
+| Field | Type | Validation rule | Why it exists |
 |---|---|---|---|
-| `schema_version` | str | Literal `"1.0"` | Evolución del contrato por versión, nunca editando v1. Un consumidor sabe exactamente qué forma esperar. |
-| `device_id` | str | `^PYRO-T[123]-\d{4}$` | Identidad del nodo; el tier va embebido (T1/T2/T3) para poder filtrar por prioridad sin joins. |
-| `gateway_id` | str | `^GW-\d{2,}$` | Qué gateway agregó/retransmitió el mensaje; permite diagnosticar cortes por zona. |
-| `ts_device` | datetime UTC | Timezone-aware obligatorio; serializa ISO 8601 con `Z` | **Timestamp del dispositivo**, no de la nube. Comparado con el timestamp de ingesta permite medir latencia extremo-a-extremo y detectar relojes desviados. |
-| `seq` | int ≥ 0 | Contador monótono por dispositivo | **Detección de pérdida y duplicados**: un hueco en `seq` = mensajes perdidos; un `seq` repetido = duplicado (MQTT QoS1 puede duplicar). La monotonicidad la verifica el consumidor. |
-| `lat` / `lon` | float | −90..90 / −180..180 | Posición del nodo (fija tras despliegue, pero viaja en cada mensaje para que el consumidor no dependa de un registro externo). |
-| `elevation_m` | float | — | Elevación del sitio (del DEM); relevante para modelos de propagación. |
-| `temp_c` | float | −20..80 | Rango físico sano para la sierra bogotana; fuera de eso es fallo de sensor, no clima. |
-| `rh_pct` | float | 0..100 | Humedad relativa. |
-| `smoke_ppm` | float | ≥ 0 | Concentración de humo — la señal primaria. |
-| `wind_speed_ms` | float \| null | ≥ 0 o `null` | `null` = el nodo no tiene anemómetro (solo algunos tiers lo llevan). **La clave nunca se omite**: forma estable para el parser. |
-| `wind_dir_deg` | float \| null | 0..360 o `null` | Ídem. |
-| `battery_pct` | float | 0..100 | Salud energética; insumo de `LOW_BATTERY`. |
-| `status` | enum | `OK` \| `DEGRADED` \| `LOW_BATTERY` | **Salud del dispositivo, jamás señal de fuego** — ver [ADR-0005](adr/ADR-0005-sensor-no-alerta.md). |
+| `schema_version` | str | Literal `"1.0"` | Contract evolution happens by version, never by editing v1. A consumer knows exactly what shape to expect. |
+| `device_id` | str | `^PYRO-T[123]-\d{4}$` | Node identity; the tier is embedded (T1/T2/T3) so priority filtering needs no joins. |
+| `gateway_id` | str | `^GW-\d{2,}$` | Which gateway aggregated/relayed the message; enables diagnosing per-zone outages. |
+| `ts_device` | datetime UTC | Timezone-aware required; serializes as ISO 8601 with `Z` | The **device's** timestamp, not the cloud's. Compared against ingestion time it measures end-to-end latency and detects clock drift. |
+| `seq` | int ≥ 0 | Per-device monotonic counter | **Loss and duplicate detection**: a gap in `seq` = lost messages; a repeated `seq` = a duplicate (MQTT QoS 1 may re-deliver). Monotonicity is verified by the consumer. |
+| `lat` / `lon` | float | −90..90 / −180..180 | Node position (fixed after deployment, but travels in every message so the consumer needs no external registry). |
+| `elevation_m` | float | — | Site elevation (from the DEM); relevant for propagation models. |
+| `temp_c` | float | −20..80 | Sane physical range for the Bogotá highlands; anything outside is sensor failure, not weather. |
+| `rh_pct` | float | 0..100 | Relative humidity. |
+| `smoke_ppm` | float | ≥ 0 | Smoke concentration — the primary signal. |
+| `wind_speed_ms` | float \| null | ≥ 0 or `null` | `null` = the node has no anemometer (only some tiers carry one). **The key is never omitted**: a stable shape for the parser. |
+| `wind_dir_deg` | float \| null | 0..360 or `null` | Same as above. |
+| `battery_pct` | float | 0..100 | Energy health; feeds `LOW_BATTERY`. |
+| `status` | enum | `OK` \| `DEGRADED` \| `LOW_BATTERY` | **Device health, never a fire signal** — see [ADR-0005](adr/ADR-0005-device-health-not-alerts.md). |
 
-## Reglas transversales
+## Cross-cutting rules
 
-- **Campos desconocidos se rechazan** (`extra="forbid"`): el contrato está blindado en
-  ambas direcciones; los bugs de integración fallan rápido y del lado del productor.
-- **Payload plano** (sin anidamiento): simplifica el mapeo a columnas en el pipeline de
-  analítica y las reglas SQL de IoT Core.
-- **Inmutable**: una vez construido y validado, un payload no se muta; cualquier "edición"
-  es construir uno nuevo.
+- **Unknown fields are rejected** (`extra="forbid"`): the contract is
+  armored in both directions; integration bugs fail fast and on the producer
+  side.
+- **Flat payload** (no nesting): simplifies column mapping in the analytics
+  pipeline and the IoT Core SQL rules.
+- **Immutable**: once built and validated, a payload is never mutated; any
+  "edit" means building a new one.
