@@ -1,4 +1,4 @@
-"""Helper to write minimal sensores.geojson files for fleet tests."""
+"""Helper to write minimal sensors.geojson files for fleet tests."""
 
 import json
 from pathlib import Path

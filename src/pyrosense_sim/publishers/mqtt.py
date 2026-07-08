@@ -18,7 +18,7 @@ running). Publication metrics (sent, failed, retries) are logged every
 The AWS transport itself (`awsiot` connection) is isolated behind the
 tiny :class:`MqttConnection` protocol so every behavior above is tested
 against a mocked broker; real IoT Core usage is deferred until the
-cloud stage (E2) exists.
+cloud backend exists.
 """
 
 import logging
@@ -188,7 +188,7 @@ class MqttPublisher:
 
 
 def _build_aws_connection(settings: MqttSettings) -> MqttConnection:  # pragma: no cover
-    """Build the real AWS IoT Core connection (exercised only against AWS, E2 stage)."""
+    """Build the real AWS IoT Core connection (exercised only against real AWS)."""
     return _AwsIotConnection(settings)
 
 

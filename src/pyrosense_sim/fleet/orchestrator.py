@@ -74,7 +74,7 @@ class FleetOrchestrator:
         """Build an orchestrator from a site plan file and a scenario.
 
         Args:
-            site_path: ``sensores.geojson`` produced by the site-planner.
+            site_path: ``sensors.geojson`` produced by the site-planner.
             scenario: Validated scenario configuration.
             publisher: Destination for every payload (stdout, file, ...).
             speed: Simulated-to-real time factor for the scheduler.
@@ -142,7 +142,7 @@ class FleetOrchestrator:
 
 
 def _load_nodes(site_path: Path, scenario: ScenarioConfig) -> list[SensorNode]:
-    """Instantiate the fleet from a sensores.geojson FeatureCollection.
+    """Instantiate the fleet from a sensors.geojson FeatureCollection.
 
     When the scenario sets ``load.fleet_multiplier > 1`` the fleet is
     replicated with derived, contract-valid device ids (see

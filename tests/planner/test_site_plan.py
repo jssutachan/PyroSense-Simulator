@@ -72,7 +72,7 @@ class TestDeterminism:
         reference_plan(tmp_path, seed=11).write(first_dir)
         reference_plan(tmp_path, seed=11).write(second_dir)
 
-        for name in ("sensores.geojson", "gateways.geojson", "site-report.md"):
+        for name in ("sensors.geojson", "gateways.geojson", "site-report.md"):
             assert (first_dir / name).read_bytes() == (second_dir / name).read_bytes(), name
 
     def test_different_seed_changes_the_plan(self, tmp_path: Path) -> None:
@@ -93,11 +93,11 @@ class TestReport:
     def test_write_emits_the_three_artifacts(self, tmp_path: Path) -> None:
         out = tmp_path / "out"
         reference_plan(tmp_path).write(out)
-        assert (out / "sensores.geojson").exists()
+        assert (out / "sensors.geojson").exists()
         assert (out / "gateways.geojson").exists()
         assert (out / "site-report.md").exists()
         # And the GeoJSON parses back.
-        parsed = json.loads((out / "sensores.geojson").read_text(encoding="utf-8"))
+        parsed = json.loads((out / "sensors.geojson").read_text(encoding="utf-8"))
         assert parsed["type"] == "FeatureCollection"
 
 

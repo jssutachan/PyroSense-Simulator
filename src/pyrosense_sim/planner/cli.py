@@ -24,33 +24,35 @@ from pyrosense_sim.planner.zones import ZoneSet
 
 app = typer.Typer(
     name="site-planner",
-    help="Genera el plan de despliegue de sensores PyroSense desde un DEM y un AOI.",
+    help="Generate the PyroSense sensor deployment plan from a DEM and an AOI.",
     no_args_is_help=True,
 )
 
 
 @app.callback()
 def _root() -> None:
-    """Site-planner de PyroSense: del terreno real al plan de despliegue."""
+    """PyroSense site planner: from real terrain to a deployment plan."""
 
 
 @app.command()
 def generate(
-    dem: Annotated[Path, typer.Option(exists=True, dir_okay=False, help="DEM GeoTIFF del área.")],
+    dem: Annotated[
+        Path, typer.Option(exists=True, dir_okay=False, help="GeoTIFF DEM of the area.")
+    ],
     aoi: Annotated[
         Path,
-        typer.Option(exists=True, dir_okay=False, help="GeoJSON con el polígono del AOI."),
+        typer.Option(exists=True, dir_okay=False, help="GeoJSON with the AOI polygon."),
     ],
     config: Annotated[
         Path | None,
-        typer.Option(exists=True, dir_okay=False, help="YAML de parámetros (opcional)."),
+        typer.Option(exists=True, dir_okay=False, help="Parameters YAML (optional)."),
     ] = None,
-    out: Annotated[Path, typer.Option(help="Directorio de salida.")] = Path("out"),
+    out: Annotated[Path, typer.Option(help="Output directory.")] = Path("out"),
     preview: Annotated[
-        bool, typer.Option(help="Genera preview.png (requiere el extra 'preview').")
+        bool, typer.Option(help="Render preview.png (requires the 'preview' extra).")
     ] = False,
 ) -> None:
-    """Generate sensores.geojson, gateways.geojson and site-report.md."""
+    """Generate sensors.geojson, gateways.geojson and site-report.md."""
     params = load_params(config)
     terrain = TerrainModel(dem)
     aoi_polygon = _load_aoi(aoi)
@@ -66,8 +68,8 @@ def generate(
 
         render_preview(terrain, plan, out / "preview.png")
     typer.echo(
-        f"Plan generado: {len(plan.nodes)} nodos, {len(plan.gateways)} gateways, "
-        f"{plan.relocated_count} reubicados, {plan.dropped_count} descartados -> {out}/"
+        f"Plan generated: {len(plan.nodes)} nodes, {len(plan.gateways)} gateways, "
+        f"{plan.relocated_count} relocated, {plan.dropped_count} dropped -> {out}/"
     )
 
 

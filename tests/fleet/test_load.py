@@ -28,7 +28,7 @@ def multiplied_scenario(multiplier: int) -> ScenarioConfig:
 
 
 def build_orchestrator(tmp_path: Path, multiplier: int) -> FleetOrchestrator:
-    site = write_site(tmp_path / "sensores.geojson", node_count=3)
+    site = write_site(tmp_path / "sensors.geojson", node_count=3)
     return FleetOrchestrator.from_files(
         site,
         multiplied_scenario(multiplier),
@@ -53,7 +53,7 @@ def test_multiplier_replicates_the_fleet_with_unique_valid_ids(tmp_path: Path) -
 
 
 def test_multiplied_fleet_multiplies_the_emissions(tmp_path: Path) -> None:
-    site = write_site(tmp_path / "sensores.geojson", node_count=3)
+    site = write_site(tmp_path / "sensors.geojson", node_count=3)
     outputs: list[int] = []
     for multiplier in (1, 3):
         stream = io.StringIO()
