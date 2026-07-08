@@ -1,35 +1,35 @@
 # ─────────────────────────────────────────────────────────────────────
-# Referencia de configuración de los tres publishers de fleet-sim.
+# Configuration reference for the three fleet-sim publishers.
 #
-# La SELECCIÓN del transporte se hace por CLI (`--publisher stdout|file|mqtt`);
-# este archivo documenta los knobs de cada uno y de dónde salen.
+# Transport SELECTION happens on the CLI (`--publisher stdout|file|mqtt`);
+# this file documents each transport's knobs and where they come from.
 # ─────────────────────────────────────────────────────────────────────
 
 stdout:
-  # Sin configuración: una línea NDJSON por payload al canal de datos
-  # (stdout); los logs van a stderr (ADR-0010). Ideal para pipes y desarrollo.
+  # No configuration: one NDJSON line per payload on the data channel
+  # (stdout); logs go to stderr (ADR-0010). Ideal for pipes and development.
 
 file:
-  # Configurado por CLI:
-  #   --out out/telemetry.ndjson   (archivo destino; el directorio se crea)
-  # Rotación por tamaño: <archivo>.1, <archivo>.2, ... (1 MB por defecto).
+  # Configured via CLI:
+  #   --out out/telemetry.ndjson   (destination file; the directory is created)
+  # Size-based rotation: <file>.1, <file>.2, ... (1 MB by default).
 
 mqtt:
-  # Conexión: variables de entorno / .env (ver .env.example) — NUNCA en
-  # archivos versionados:
-  #   PYROSENSE_IOT_ENDPOINT        endpoint ATS de AWS IoT Core
-  #   PYROSENSE_CERT_PATH           certificado X.509 del dispositivo
-  #   PYROSENSE_PRIVATE_KEY_PATH    llave privada (jamás se loguea)
-  #   PYROSENSE_ROOT_CA_PATH        CA raíz de Amazon
+  # Connection: environment variables / .env (see .env.example) — NEVER
+  # in committed files:
+  #   PYROSENSE_IOT_ENDPOINT        AWS IoT Core ATS endpoint
+  #   PYROSENSE_CERT_PATH           device X.509 certificate
+  #   PYROSENSE_PRIVATE_KEY_PATH    private key (never logged)
+  #   PYROSENSE_ROOT_CA_PATH        Amazon root CA
   #   PYROSENSE_TOPIC_BASE          default: pyrosense
   #   PYROSENSE_ENV                 dev | staging | prod
   #
-  # Topic resultante: {topic_base}/{env}/telemetry/{device_id} con QoS 1.
-  # Consecuencia at-least-once: la DEDUPLICACIÓN por device_id+seq es
-  # responsabilidad de la nube (ADR-0013).
+  # Resulting topic: {topic_base}/{env}/telemetry/{device_id} at QoS 1.
+  # At-least-once consequence: DEDUPLICATION by device_id+seq is the
+  # cloud's responsibility (ADR-0013).
   #
-  # Comportamiento (defaults en código, inyectables):
-  #   max_retries: 5            reintentos por payload antes de descartar
-  #   base_backoff_s: 0.5       backoff exponencial + jitter
+  # Behavior (code defaults, injectable):
+  #   max_retries: 5            retries per payload before dropping it
+  #   base_backoff_s: 0.5       exponential backoff + jitter
   #   max_backoff_s: 30.0
-  #   metrics_interval_s: 30.0  log de métricas (enviados/fallidos/reintentos)
+  #   metrics_interval_s: 30.0  metrics log (sent/failed/retries)
