@@ -1,0 +1,37 @@
+# Load-test scenario: validates the throughput of the ingestion pipeline.
+#
+# Two combined levers:
+#   1. `load.fleet_multiplier: 5` — replicates the fleet 5x with derived
+#      device ids that remain valid against the contract (a ~270-node plan
+#      becomes ~1,350 unique devices).
+#   2. `node.t_normal_s: 60` — normal cadence 5x faster (60 s vs 300 s).
+#
+# Net effect: ~25x the baseline message volume. With `--publisher mqtt`
+# this exercises real QoS 1 against IoT Core; with `--publisher stdout` it
+# measures the simulator's own ceiling.
+name: load_test
+description: >
+  Fleet replicated 5x with accelerated cadence to stress the ingestion
+  pipeline. Healthy operation only (no fire, no faults): the goal is to
+  measure throughput, not to confound the signal.
+start_time: "2026-04-15T00:00:00Z"
+duration_hours: 1.0
+seed: 20260555
+
+environment: # wet-season baseline (identical to baseline.yaml)
+  temp_mean_c: 13.0
+  temp_amplitude_c: 5.0
+  temp_peak_hour: 14.0
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 85.0
+  rh_amplitude_pct: 10.0
+  wind_speed_mean_ms: 2.0
+  wind_dir_mean_deg: 100.0
+  smoke_baseline_ppm: 0.02
+
+node:
+  t_normal_s: 60.0 # accelerated cadence for the load test
+
+load:
+  fleet_multiplier: 5

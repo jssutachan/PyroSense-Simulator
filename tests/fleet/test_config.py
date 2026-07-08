@@ -18,7 +18,7 @@ def write_scenario(tmp_path: Path, content: str) -> Path:
 
 @pytest.mark.parametrize(
     "name",
-    ["baseline.yaml", "temporada_seca.yaml", "replay_enero_2024.yaml", "fallos.yaml"],
+    ["baseline.yaml", "dry_season.yaml", "january_2024_replay.yaml", "faults.yaml"],
 )
 def test_shipped_scenarios_are_valid(name: str) -> None:
     config = load_scenario(REPO_ROOT / "scenarios" / name)
@@ -26,13 +26,13 @@ def test_shipped_scenarios_are_valid(name: str) -> None:
 
 
 def test_replay_scenario_carries_the_fire() -> None:
-    config = load_scenario(REPO_ROOT / "scenarios" / "replay_enero_2024.yaml")
+    config = load_scenario(REPO_ROOT / "scenarios" / "january_2024_replay.yaml")
     assert len(config.fires) == 1
     assert config.fires[0].start_hour == 2.5
 
 
 def test_fallos_scenario_enables_all_faults() -> None:
-    config = load_scenario(REPO_ROOT / "scenarios" / "fallos.yaml")
+    config = load_scenario(REPO_ROOT / "scenarios" / "faults.yaml")
     assert config.faults is not None
     assert config.faults.node_dropout is not None
     assert config.faults.burst_reconnect is not None

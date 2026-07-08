@@ -77,8 +77,8 @@ def test_serial_overflow_is_a_clear_error(tmp_path: Path) -> None:
         build_orchestrator(tmp_path, multiplier=4000)
 
 
-def test_shipped_carga_scenario_multiplies_and_accelerates() -> None:
-    config = load_scenario(REPO_ROOT / "scenarios" / "carga.yaml")
+def test_shipped_load_scenario_multiplies_and_accelerates() -> None:
+    config = load_scenario(REPO_ROOT / "scenarios" / "load_test.yaml")
     assert config.load.fleet_multiplier == 5
     assert config.node.t_normal_s == 60.0
     assert not config.fires  # clean signal, pure volume

@@ -1,11 +1,10 @@
-# Escenario base: 24 h de operación normal en temporada húmeda.
-# Sin fuego, sin fallos — la línea base contra la que se comparan los
-# escenarios de El Niño (temporada_seca.yaml) y de incendio (Path 6).
+# Baseline scenario: 24 hours of healthy operation in the wet season.
+# No fire, no faults — the reference against which the El Niño
+# (dry_season.yaml) and fire (january_2024_replay.yaml) scenarios are compared.
 name: baseline
 description: >
-  Día típico de temporada húmeda en los Cerros Orientales: fresco,
-  húmedo, vientos suaves. Ningún nodo debería entrar en frecuencia
-  de alerta.
+  A typical wet-season day in the Cerros Orientales: cool, humid, gentle
+  winds. No node should ever enter its alert cadence.
 start_time: "2026-04-15T00:00:00Z"
 duration_hours: 24.0
 seed: 20260415
