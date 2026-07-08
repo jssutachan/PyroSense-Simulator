@@ -10,6 +10,8 @@ This site documents the subsystem for two audiences:
   [architecture decision records](adr/index.md).
 - **Using or extending the code** → the [API reference](reference.md)
   (generated from docstrings) and the [contributing guide](CONTRIBUTING.md).
+- **Validating the system** → the [testing strategy](testing-strategy.md):
+  local acceptance gates and the cloud-pipeline validation runbook.
 
 The most important piece of the subsystem is the
 [v1 data contract](data-contract.md): the frozen agreement between the

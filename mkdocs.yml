@@ -62,5 +62,6 @@ nav:
       - ADR-0011 Parametric fire: adr/ADR-0011-parametric-fire.md
       - ADR-0012 Faults as decorator: adr/ADR-0012-faults-as-decorator.md
       - ADR-0013 QoS 1, dedupe in the cloud: adr/ADR-0013-qos1-dedupe-in-the-cloud.md
+  - Testing strategy: testing-strategy.md
   - Contributing: CONTRIBUTING.md
   - Best-practices review: best-practices-review.md
