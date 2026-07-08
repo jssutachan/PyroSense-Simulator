@@ -4,8 +4,8 @@
 gateway planner (both injectable, defaults provided) and ``write``
 emits the three artifacts consumed downstream:
 
-- ``sensores.geojson`` — input of the fleet engine (Path 5); its
-  feature schema is stable from this path on.
+- ``sensors.geojson`` — input of the fleet simulator; its feature
+  schema is stable.
 - ``gateways.geojson`` — gateway metadata.
 - ``site-report.md`` — human-readable summary for the deployment team.
 
@@ -28,7 +28,7 @@ from pyrosense_sim.planner.placement import HexGridPlacement, PlacementStrategy,
 from pyrosense_sim.planner.terrain import TerrainModel
 from pyrosense_sim.planner.zones import Tier, Zone, ZoneSet
 
-SENSORS_FILENAME = "sensores.geojson"
+SENSORS_FILENAME = "sensors.geojson"
 GATEWAYS_FILENAME = "gateways.geojson"
 REPORT_FILENAME = "site-report.md"
 
@@ -109,7 +109,7 @@ class SitePlan:
         )
 
     def sensors_geojson(self) -> dict[str, object]:
-        """Build the sensors FeatureCollection (schema stable from Path 4 on)."""
+        """Build the sensors FeatureCollection (stable schema, consumed downstream)."""
         features = [
             {
                 "type": "Feature",
@@ -207,7 +207,7 @@ class SitePlan:
         """Write the three plan artifacts into ``out_dir`` (created if needed).
 
         Args:
-            out_dir: Destination directory for ``sensores.geojson``,
+            out_dir: Destination directory for ``sensors.geojson``,
                 ``gateways.geojson`` and ``site-report.md``.
         """
         out_dir.mkdir(parents=True, exist_ok=True)

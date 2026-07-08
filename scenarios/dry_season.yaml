@@ -1,0 +1,24 @@
+# Dry season under El Niño (January): hotter, much drier, windier.
+# NO fire — this is the "high-risk day" that precedes the fire scenarios.
+# Conditions approach the nodes' alert thresholds without systematically
+# crossing them.
+name: dry_season
+description: >
+  A dry El Niño day in the Cerros Orientales, like the days leading up to
+  the January 2024 fires: high temperatures for the Bogotá highlands, low
+  relative humidity, and sustained easterly wind.
+start_time: "2026-01-15T00:00:00Z"
+duration_hours: 24.0
+seed: 20260115
+
+environment:
+  temp_mean_c: 17.0
+  temp_amplitude_c: 8.0
+  temp_peak_hour: 13.5
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 50.0
+  rh_amplitude_pct: 20.0
+  wind_speed_mean_ms: 4.5
+  wind_dir_mean_deg: 95.0
+  smoke_baseline_ppm: 0.03

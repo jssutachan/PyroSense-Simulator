@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class EnvironmentConfig(BaseModel):
-    """Baseline environment parameters (no fire events; those arrive in Path 6)."""
+    """Baseline environment parameters (fire events are configured separately)."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -144,7 +144,7 @@ class BatteryDecayConfig(BaseModel):
 
 
 class LoadConfig(BaseModel):
-    """Load-test controls (E5): replicate the fleet to stress the pipeline."""
+    """Load-test controls: replicate the fleet to stress the ingestion pipeline."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

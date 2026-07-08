@@ -83,10 +83,10 @@ class TestValidationRules:
         ("field", "bad_value"),
         [
             ("schema_version", "2.0"),
-            ("device_id", "PYRO-T4-0001"),  # tier 4 no existe
-            ("device_id", "PYRO-T1-42"),  # serial de menos de 4 dígitos
-            ("gateway_id", "GW-1"),  # requiere al menos 2 dígitos
-            ("ts_device", datetime(2026, 7, 7, 12, 30, 0)),  # naive: sin timezone
+            ("device_id", "PYRO-T4-0001"),  # tier 4 does not exist
+            ("device_id", "PYRO-T1-42"),  # serial shorter than 4 digits
+            ("gateway_id", "GW-1"),  # requires at least 2 digits
+            ("ts_device", datetime(2026, 7, 7, 12, 30, 0)),  # naive: no timezone
             ("seq", -1),
             ("lat", 91.0),
             ("lon", -181.0),
@@ -98,7 +98,7 @@ class TestValidationRules:
             ("wind_speed_ms", -0.5),
             ("wind_dir_deg", 360.5),
             ("battery_pct", 101.0),
-            ("status", "ON_FIRE"),  # la alerta no es responsabilidad del sensor
+            ("status", "ON_FIRE"),  # alerting is not the sensor's responsibility
         ],
     )
     def test_rejects_invalid_value(self, field: str, bad_value: Any) -> None:

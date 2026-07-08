@@ -1,42 +1,41 @@
 # ─────────────────────────────────────────────────────────────────────
-# PyroSense site-planner — parámetros de planificación
-# Copia a params.yaml y ajusta. Todos los valores son opcionales:
-# lo ausente toma el default que se muestra aquí.
-# Uso: site-planner generate --dem ... --aoi ... --config params.yaml
+# PyroSense site-planner — planning parameters
+# Copy to params.yaml and adjust. Every value is optional: anything
+# absent takes the default shown here.
+# Usage: site-planner generate --dem ... --aoi ... --config params.yaml
 # ─────────────────────────────────────────────────────────────────────
 
-# Radio de detección efectivo por nodo (m). Documenta el supuesto de
-# cobertura detrás de las densidades; d = r·√3 ≈ 216 m en cobertura plena.
+# Effective detection radius per node (m). Documents the coverage
+# assumption behind the densities; d = r·√3 ≈ 216 m at full coverage.
 detection_radius_m: 125.0
 
-# Densidad objetivo por tier, en hectáreas por nodo
-# (T1: interfaz urbano-forestal/senderos; T2: pino/eucalipto; T3: resto).
+# Target density per tier, in hectares per node
+# (T1: wildland-urban interface/trails; T2: pine/eucalyptus; T3: rest).
 densities_ha:
   t1: 4.0
   t2: 10.0
   t3: 25.0
 
-# Jitter máximo aplicado a cada posición de la rejilla (m, por eje).
+# Maximum jitter applied to each grid position (m, per axis).
 jitter_m: 25.0
 
-# Pendiente máxima instalable (grados); por encima se reubica al
-# vecino válido más cercano.
+# Maximum installable slope (degrees); anything above it is relocated
+# to the nearest valid neighbour.
 max_slope_deg: 45.0
 
-# Semilla de TODA la aleatoriedad: misma semilla + mismos insumos
-# = plan byte-idéntico.
+# Seed for ALL randomness: same seed + same inputs = byte-identical plan.
 seed: 0
 
-# Nodos por gateway para dimensionar ceil(n/capacidad) gateways.
+# Nodes per gateway used to size ceil(n/capacity) gateways.
 gateway_capacity: 60
 
-# Radio (m) alrededor de cada centroide donde se busca el punto más alto.
+# Radius (m) searched around each centroid for the highest ground.
 gateway_snap_radius_m: 200.0
 
-# Ancho (m) de la franja T1 derivada desde el borde occidental del AOI
-# cuando NO se proveen polígonos de zonas propios.
+# Width (m) of the T1 strip derived from the AOI's western edge when
+# no custom zone polygons are provided.
 t1_buffer_m: 400.0
 
-# GeoJSON con polígonos de tiers propios (properties: tier, zone_name).
-# Si se define, reemplaza la derivación por defecto.
-# zones_geojson: config/zonas.geojson
+# GeoJSON with custom tier polygons (properties: tier, zone_name).
+# When set, it replaces the default derivation.
+# zones_geojson: config/zones.geojson

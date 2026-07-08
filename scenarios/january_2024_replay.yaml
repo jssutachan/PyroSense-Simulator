@@ -1,0 +1,48 @@
+# Parametric replay of the Cerros Orientales fire (January 2024).
+#
+# Real-world reference: on January 22, 2024 a wildfire broke out in the
+# El Cable / La Vieja creek area of Bogotá's eastern hills, with ignition
+# attributed to campfires near hiking trails, at the peak of an
+# El Niño-intensified dry season. It grew slowly through the early morning
+# and easterly winds accelerated it downslope toward the city during the
+# day, reaching on the order of ~12 equivalent hectares.
+#
+# None of this is fire-spread physics: it is parametric interpolation
+# (ADR-0011) calibrated to reproduce that event's SIGNATURE in the
+# telemetry: spatially correlated multi-sensor readings with
+# temperature up, humidity down, smoke way up.
+name: january_2024_replay
+description: >
+  Nighttime ignition near hiking trails in the El Cable area on a dry
+  El Niño day; slow initial growth, then wind-driven push toward the
+  western slope hours later.
+start_time: "2026-01-22T00:00:00Z"
+duration_hours: 12.0
+seed: 20240122
+
+environment: # same conditions as dry_season (El Niño)
+  temp_mean_c: 17.0
+  temp_amplitude_c: 8.0
+  temp_peak_hour: 13.5
+  lapse_rate_c_per_km: -6.5
+  reference_elevation_m: 2600.0
+  rh_mean_pct: 50.0
+  rh_amplitude_pct: 20.0
+  wind_speed_mean_ms: 4.5
+  wind_dir_mean_deg: 95.0
+  smoke_baseline_ppm: 0.03
+
+fires:
+  - epicenter_lon: -74.052 # El Cable / La Vieja area (approximate)
+    epicenter_lat: 4.605
+    start_hour: 2.5 # nighttime ignition around 02:30
+    initial_radius_m: 90.0 # ~2.5 initial hectares (r = sqrt(A/pi))
+    growth_rate_m_per_min: 1.0 # slow radial growth
+    wind_bias: # easterly wind pushes the front
+      east_m_per_min: -2.0 #   westward (toward the city)
+      north_m_per_min: 0.5
+    ramp_minutes: 30.0 # the thermal signature takes ~30 min to peak
+    halo_m: 250.0 # smoke/heat perceptible beyond the front
+    peak_temp_delta_c: 22.0
+    peak_rh_drop_pct: 25.0
+    peak_smoke_ppm: 45.0

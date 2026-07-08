@@ -14,7 +14,7 @@ runner = CliRunner()
 
 @pytest.fixture
 def site(tmp_path: Path) -> Path:
-    return write_site(tmp_path / "sensores.geojson")
+    return write_site(tmp_path / "sensors.geojson")
 
 
 @pytest.fixture

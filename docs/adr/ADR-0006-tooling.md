@@ -1,34 +1,36 @@
-# ADR-0006 — Tooling: uv, src layout, mypy strict, cobertura con umbral vivo
+# ADR-0006 — Tooling: uv, src layout, strict mypy, living coverage threshold
 
-**Estado:** Aceptado (Path 1, 2026-07-07)
+**Status:** Accepted (2026-07-07)
 
-## Contexto
+## Context
 
-El proyecto exige Python ≥ 3.12; la máquina de desarrollo trae 3.10 y no hay
-garantía de sudo. El repo es evidencia de portafolio: el tooling debe ser el de un
-equipo profesional actual.
+The project requires Python ≥ 3.12; development machines may ship older
+interpreters and sudo is not guaranteed. The repository doubles as portfolio
+evidence: the tooling should match what a professional team uses today.
 
-## Decisión
+## Decision
 
-- **uv** gestiona el entorno virtual y el propio intérprete (descarga CPython 3.12).
-- **src layout** (`src/pyrosense_sim/`) con build backend **hatchling** e instalación
-  editable.
-- **mypy strict** sobre `src/` y `tests/`, con plugin de pydantic y stubs
-  (`types-shapely`).
-- **ruff** para lint + formato (reglas E, W, F, I, UP, B, SIM, C4, PT, RUF).
-- **pytest-cov** con umbral que sube con el proyecto (hoy 90; real: 100) y
-  **warnings-como-errores** con excepciones documentadas.
+- **uv** manages the virtual environment and the interpreter itself
+  (it downloads CPython 3.12).
+- **src layout** (`src/pyrosense_sim/`) with the **hatchling** build backend
+  and editable installs.
+- **Strict mypy** over `src/` and `tests/`, with the pydantic plugin and
+  third-party stubs (`types-shapely`, `types-PyYAML`).
+- **ruff** for linting + formatting (E, W, F, I, UP, B, SIM, C4, PT, RUF).
+- **pytest-cov** with a threshold that rises with the project, and
+  **warnings-as-errors** with documented exceptions.
 
-## Consecuencias
+## Consequences
 
-- Reproducible en cualquier máquina sin tocar el Python del sistema.
-- El src layout fuerza a testear el paquete instalado, no el directorio local —
-  los bugs de packaging aparecen en desarrollo, no en producción.
-- mypy strict convierte errores de diseño en errores de compilación (p. ej. obligó
-  al narrowing explícito de geometrías shapely).
+- Reproducible on any machine without touching the system Python.
+- The src layout forces tests to exercise the installed package, not the
+  local directory — packaging bugs surface in development, not production.
+- Strict mypy turns design mistakes into type errors (e.g., it forced
+  explicit geometry narrowing over shapely operations).
 
-## Alternativas descartadas
+## Alternatives considered
 
-- **deadsnakes/pyenv**: requieren sudo o son más lentos; acoplan al SO.
-- **flat layout**: permite imports accidentales del código sin instalar.
-- **setuptools clásico**: más boilerplate sin beneficio aquí.
+- **deadsnakes/pyenv**: require sudo or are slower; couple the setup to
+  the OS.
+- **Flat layout**: allows accidental imports of uninstalled code.
+- **Classic setuptools**: more boilerplate with no benefit here.

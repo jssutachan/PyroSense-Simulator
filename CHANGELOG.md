@@ -1,117 +1,117 @@
 # Changelog
 
-Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
-versionado alineado a hitos del proyecto. Una entrada por path completado.
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
+versions aligned to project milestones.
 
-## [0.7.0] — Path 7: publisher MQTT, carga y cierre — 2026-07-07
+## [0.7.0] — MQTT publisher, load testing and subsystem completion — 2026-07-07
 
 ### Added
-- `MqttPublisher`: TLS mutua hacia AWS IoT Core, topic
-  `{base}/{env}/telemetry/{device_id}` con **QoS 1**, reintentos con backoff
-  exponencial + jitter, métricas periódicas al log, cero secretos en logs y
-  config solo por env/.env (pydantic-settings). Dedupe por `device_id`+`seq`
-  es responsabilidad de la nube — ADR-0013. Probado íntegramente con broker
-  mockeado; el uso real espera a la etapa E2.
-- `scenarios/carga.yaml` + `load.fleet_multiplier`: réplica de flota con
-  device_ids derivados válidos (~25× el volumen del baseline con cadencia 60 s).
-- `--publisher mqtt` en el CLI (import perezoso: el modo offline no toca AWS);
-  `config/publisher.example.yaml` documentando los tres transportes.
-- README final con las 5 decisiones de diseño defendibles en entrevista.
+- `MqttPublisher`: mutual TLS toward AWS IoT Core, topic
+  `{base}/{env}/telemetry/{device_id}` at **QoS 1**, retries with exponential
+  backoff + jitter, periodic metrics logging, zero secrets in logs, and
+  configuration via env/`.env` only (pydantic-settings). Deduplication by
+  `device_id`+`seq` is the cloud's responsibility — ADR-0013. Fully tested
+  against a mocked broker.
+- `scenarios/load_test.yaml` + `load.fleet_multiplier`: fleet replication
+  with derived, contract-valid device ids (~25x baseline volume at 60 s
+  cadence).
+- `--publisher mqtt` on the CLI (lazy import: offline transports never touch
+  AWS code paths); `config/publisher.example.yaml` documenting all three
+  transports.
+- Final README with the five interview-defensible design decisions.
 
 ### Fixed
-- `.env.example`: `PYROSENSE_TOPIC_BASE` alineado al layout real de topics.
+- `.env.example`: `PYROSENSE_TOPIC_BASE` aligned with the real topic layout.
 
-## [0.6.0] — Path 6: eventos de fuego + inyección de fallos — 2026-07-07
-
-### Added
-- `FireEvent`: fuego paramétrico (círculo con crecimiento radial, deriva por
-  viento, ramp-in smoothstep, halo de decaimiento) que perturba la línea base en
-  `EnvironmentModel.conditions_at` — interpolación, no física (ADR-0011).
-- `FaultInjector`: decorador componible del `Publisher` (ADR-0012) —
-  `node_dropout`, `burst_reconnect` (backlog con `ts_device` originales y `seq`
-  consecutivos), `duplicates` QoS 1, `out_of_order`, `battery_decay`;
-  `SensorNode` intacto.
-- Escenarios `replay_enero_2024.yaml` (firma del incendio real, comentado) y
-  `fallos.yaml` (los cinco fallos, componible sobre cualquier escenario).
-- Bloques `fires:`/`faults:` en el YAML de escenario, validación estricta;
-  `geo.distance_m` compartido.
-
-## [0.5.0] — Path 5: motor de flota baseline — 2026-07-07
+## [0.6.0] — Fire events and fault injection — 2026-07-07
 
 ### Added
-- `fleet/config.py`: escenarios YAML validados con pydantic estricto (frontera de
-  usuario); escenarios `baseline.yaml` y `temporada_seca.yaml` (El Niño, sin fuego).
-- `EnvironmentModel`: verdad de terreno pura — ciclo diurno sinusoidal, lapse rate
-  −6.5 °C/km, humedad anticorrelacionada; hook para eventos de fuego (P6) — ADR-0009.
-- `SensorNode`: RNG propio por nodo (`seed:device_id`), `seq` monótono, batería con
-  drenaje temporal, `status` por umbrales, cadencia adaptativa 300 s → 30 s.
-- `Scheduler`: heap determinista (desempate por device_id) con reloj simulado y
-  `--speed`; sleep inyectable.
-- `FleetOrchestrator`: carga `sensores.geojson` validando propiedades, compone todo
-  vía DIP, SIGINT cierra limpio con resumen (emitidos, por status, duración sim/real).
-- CLI `fleet-sim run` (typer): stdout = datos NDJSON, stderr = logs — ADR-0010;
-  corre íntegramente sin credenciales AWS.
+- `FireEvent`: parametric fire (circle with radial growth, wind drift,
+  smoothstep ramp-in, decay halo) perturbing the baseline in
+  `EnvironmentModel.conditions_at` — interpolation, not physics (ADR-0011).
+- `FaultInjector`: composable `Publisher` decorator (ADR-0012) —
+  `node_dropout`, `burst_reconnect` (backlog replayed with original
+  `ts_device` values and consecutive `seq`), QoS 1 `duplicates`,
+  `out_of_order`, `battery_decay`; `SensorNode` untouched.
+- Scenarios `january_2024_replay.yaml` (the real fire's signature,
+  annotated) and `faults.yaml` (all five faults, composable onto any
+  scenario).
+- `fires:`/`faults:` scenario blocks with strict validation; shared
+  `geo.distance_m`.
 
-## [0.4.0] — Path 4: site-planner completo — 2026-07-07
+## [0.5.0] — Baseline fleet engine — 2026-07-07
 
 ### Added
-- `HexGridPlacement` (tras el Protocol `PlacementStrategy`): rejilla hexagonal por
-  tier con espaciamiento derivado de densidad (T1 1/4 ha, T2 1/10 ha, T3 1/25 ha),
-  jitter sembrado ±25 m y reubicación contabilizada cuando la pendiente supera 45° —
-  nunca descartes silenciosos. Anemómetros a los sitios más altos (1/10 T1, 1/20 T2/T3).
-- `GatewayPlanner`: k-means numpy sembrado (`ceil(n/60)` clusters), snap al punto más
-  alto en 200 m, asignación por cercanía (`GW-##`). Metadato puro — ADR-0008.
-- `SitePlan`: ensamblaje con estrategia y planner inyectables; emite
-  `sensores.geojson` (esquema estable, entrada del Path 5), `gateways.geojson` y
-  `site-report.md`; salida **byte-determinista** por semilla — ADR-0007.
-- CLI `site-planner generate` (typer) con `--preview` PNG opcional (extra `preview`);
-  `config/params.example.yaml`; `PlannerParams` con validación fail-early del YAML.
-- `planner/geo.py`: conversión grados↔metros unificada.
+- `fleet/config.py`: scenario YAML validated with strict pydantic (a user
+  input boundary); `baseline.yaml` and `dry_season.yaml` (El Niño, no fire)
+  scenarios.
+- `EnvironmentModel`: pure ground truth — sinusoidal diurnal cycle,
+  −6.5 °C/km lapse rate, anticorrelated humidity — ADR-0009.
+- `SensorNode`: per-node RNG (`seed:device_id`), monotonic `seq`,
+  time-proportional battery drain, threshold-driven `status`, adaptive
+  cadence 300 s → 30 s.
+- `Scheduler`: deterministic heap (device-id tiebreak) with a simulated
+  clock and `--speed`; injectable sleep.
+- `FleetOrchestrator`: loads the site plan with fail-early property
+  validation, composes everything via dependency injection; SIGINT shuts
+  down cleanly with a summary (emitted, per-status, simulated vs real time).
+- `fleet-sim run` CLI (typer): stdout = NDJSON data, stderr = logs —
+  ADR-0010; runs entirely without AWS credentials.
+
+## [0.4.0] — Complete site planner — 2026-07-07
+
+### Added
+- `HexGridPlacement` (behind the `PlacementStrategy` protocol): hexagonal
+  grid per tier with density-derived spacing (T1 1 node/4 ha, T2 1/10 ha,
+  T3 1/25 ha), seeded ±25 m jitter and accounted slope relocation above
+  45° — never silent drops. Wind sensors go to the highest sites (1 in 10
+  on T1, 1 in 20 on T2/T3).
+- `GatewayPlanner`: seeded numpy k-means (`ceil(n/60)` clusters), snap to
+  the highest ground within 200 m, nearest-gateway assignment (`GW-##`).
+  Pure metadata — ADR-0008.
+- `SitePlan`: assembly with injectable strategy and planner; emits
+  `sensors.geojson` (stable schema, the fleet simulator's input),
+  `gateways.geojson` and `site-report.md`; **byte-deterministic** output by
+  seed — ADR-0007.
+- `site-planner generate` CLI (typer) with an optional `--preview` PNG (the
+  `preview` extra); `config/params.example.yaml`; `PlannerParams` with
+  fail-early YAML validation.
+- `planner/geo.py`: unified degree↔meter conversion.
 
 ### Changed
-- `pyproject.toml`: entry point `site-planner`, extra `preview` (matplotlib),
-  `types-PyYAML` en dev.
+- `pyproject.toml`: `site-planner` entry point, `preview` extra
+  (matplotlib), `types-PyYAML` in dev.
 
-## [Unreleased] — Consolidación P1–P3 (`chore/hardening-p1-p3`)
-
-### Added
-- Estrategia de ramas Git Flow simplificado (`main`/`develop`/`feature/*`) — ADR-0004.
-- Documentación profesional: guía de arquitectura, guía del contrato de datos, 6 ADRs,
-  informe de revisión de buenas prácticas, esta bitácora de cambios.
-- Sitio de documentación con MkDocs Material + mkdocstrings (`mkdocs build`).
-- Docstrings estilo Google en toda la API pública.
-- `ndjson_line()`: fuente única del formato de línea NDJSON.
-- `TerrainModel.__repr__`, `ZoneSet.__len__/__iter__/__repr__`.
-
-### Changed
-- `slope_at` delega la vecindad de celdas en `_neighbourhood()` (SRP a nivel de método).
-
-## [0.3.0] — Path 3: site-planner, terreno y zonas — 2026-07-07
+## [0.3.0] — Site planner: terrain and zones — 2026-07-07
 
 ### Added
-- `TerrainModel`: carga GeoTIFF (rasterio), normaliza a EPSG:4326 con reproyección
-  bilinear, consultas `elevation_at`/`slope_at` con errores accionables.
-- `Zone`/`ZoneSet`: polígonos de prioridad T1/T2/T3, lookup `tier_of`, carga GeoJSON
-  y derivación por defecto documentada (borde occidental + senderos).
-- Tests con DEMs 100 % sintéticos (rampa, plano, nodata, UTM).
-- Política de warnings-como-errores en tests.
+- `TerrainModel`: GeoTIFF loading (rasterio), normalization to EPSG:4326
+  with bilinear reprojection, `elevation_at`/`slope_at` queries with
+  actionable errors.
+- `Zone`/`ZoneSet`: T1/T2/T3 priority polygons, `tier_of` lookup, GeoJSON
+  loading and a documented default derivation (western edge + trails).
+- Tests with 100% synthetic DEMs (ramp, flat, nodata, UTM).
+- Warnings-as-errors policy for tests.
 
-## [0.2.0] — Path 2: contrato de datos v1 + publishers — 2026-07-07
-
-### Added
-- `TelemetryPayload` v1 **congelado**: pydantic, `extra="forbid"`, frozen, `ts_device`
-  UTC con sufijo `Z`, claves de viento nullable pero nunca omitidas — ADR-0002/0005.
-- JSON Schema del contrato en `docs/payload-schema-v1.json` + test anti-drift.
-- Interfaz `Publisher` (Protocol) y publishers `stdout` (NDJSON) y `file`
-  (NDJSON con rotación por tamaño).
-- Umbral de cobertura elevado a 90 (real: 100 %); mypy strict extendido a tests con
-  plugin de pydantic.
-
-## [0.1.0] — Path 1: andamiaje y tooling — 2026-07-07
+## [0.2.0] — Data contract v1 and publishers — 2026-07-07
 
 ### Added
-- src layout (`src/pyrosense_sim/`), `pyproject.toml` (hatchling), grupos de
-  dependencias, y tooling: ruff (lint+format), mypy strict, pytest-cov — ADR-0006.
-- `.gitignore` (secretos, caches, binarios geoespaciales), `.env.example`,
-  `data/README.md` con la guía de descarga del DEM (IGAC / Copernicus GLO-30).
-- Smoke test del empaquetado.
+- **Frozen** `TelemetryPayload` v1: pydantic, `extra="forbid"`, frozen,
+  `ts_device` in UTC with a `Z` suffix, nullable-but-never-omitted wind
+  keys — ADR-0002/0005.
+- The contract's JSON Schema in `docs/payload-schema-v1.json` plus an
+  anti-drift test.
+- The `Publisher` interface (Protocol) and the `stdout` (NDJSON) and `file`
+  (NDJSON with size rotation) publishers.
+- Coverage threshold raised to 90 (actual: 100%); strict mypy extended to
+  tests with the pydantic plugin.
+
+## [0.1.0] — Scaffolding and tooling — 2026-07-07
+
+### Added
+- src layout (`src/pyrosense_sim/`), `pyproject.toml` (hatchling),
+  dependency groups, and tooling: ruff (lint+format), strict mypy,
+  pytest-cov — ADR-0006.
+- `.gitignore` (secrets, caches, geospatial binaries), `.env.example`,
+  `data/README.md` with the DEM download guide (IGAC / Copernicus GLO-30).
+- Packaging smoke test.

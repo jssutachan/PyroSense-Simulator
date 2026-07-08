@@ -1,8 +1,8 @@
-# Referencia de API
+# API reference
 
-Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
+Generated automatically from the (Google-style) docstrings with mkdocstrings.
 
-## Contrato de datos
+## Data contract
 
 ::: pyrosense_sim.contracts.telemetry
 
@@ -20,7 +20,7 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 
 ::: pyrosense_sim.publishers.mqtt
 
-## Site-planner
+## Site planner
 
 ::: pyrosense_sim.planner.terrain
 
@@ -40,7 +40,7 @@ Generada automáticamente desde los docstrings (estilo Google) con mkdocstrings.
 
 ::: pyrosense_sim.planner.preview
 
-## Fleet-sim
+## Fleet simulator
 
 ::: pyrosense_sim.fleet.config
 

@@ -1,34 +1,33 @@
 # PyroSense Simulator
 
-Subsistema de simulación de **PyroSense**, la plataforma serverless en AWS para
-detección temprana de incendios forestales en los Cerros Orientales de Bogotá.
+Simulation subsystem of **PyroSense**, a serverless AWS platform for early
+wildfire detection in Bogotá's Cerros Orientales.
 
-Este sitio documenta el subsistema para dos audiencias:
+This site documents the subsystem for two audiences:
 
-- **Quien necesita entender el diseño** → empieza por la
-  [guía de arquitectura](architecture.md) (10 minutos) y las
-  [decisiones de arquitectura](adr/index.md).
-- **Quien necesita usar o extender el código** → la
-  [referencia de API](reference.md) (generada desde los docstrings) y la
-  [guía de contribución](CONTRIBUTING.md).
+- **Understanding the design** → start with the
+  [architecture guide](architecture.md) (a 10-minute read) and the
+  [architecture decision records](adr/index.md).
+- **Using or extending the code** → the [API reference](reference.md)
+  (generated from docstrings) and the [contributing guide](CONTRIBUTING.md).
+- **Validating the system** → the [testing strategy](testing-strategy.md):
+  local acceptance gates and the cloud-pipeline validation runbook.
 
-La pieza más importante del subsistema es el
-[contrato de datos v1](data-contract.md): el acuerdo congelado entre los
-sensores simulados y la plataforma cloud.
+The most important piece of the subsystem is the
+[v1 data contract](data-contract.md): the frozen agreement between the
+simulated sensors and the cloud platform.
 
-## Estado actual
+## What's inside
 
-| Path | Contenido | Estado |
+| Component | Description | Status |
 |---|---|---|
-| 1 | Andamiaje del repo y tooling de calidad | ✅ |
-| 2 | Contrato de telemetría v1 + publishers stdout/file | ✅ |
-| 3 | Site-planner: modelo de terreno y zonas prioritarias | ✅ |
-| Consolidación | Git Flow, refactor de buenas prácticas, esta documentación | ✅ |
-| 4 | Site-planner completo: placement hexagonal, gateways, plan GeoJSON y CLI | ✅ |
-| 5 | Fleet-sim: motor de flota baseline (ambiente, nodos, scheduler, CLI) | ✅ |
-| 6 | Eventos de fuego paramétricos + inyector de fallos componible | ✅ |
-| 7 | Publisher MQTT (IoT Core, QoS 1) + escenario de carga + cierre | ✅ |
+| Data contract v1 | Frozen telemetry payload + exported JSON Schema | ✅ |
+| Publishers | stdout / file (NDJSON) and MQTT toward AWS IoT Core (QoS 1) | ✅ |
+| Site planner | DEM + priority zones → deterministic sensor deployment plan + CLI | ✅ |
+| Fleet simulator | Environment model, noisy nodes, simulated clock, scenarios + CLI | ✅ |
+| Fire events | Parametric multi-sensor fire signatures (January 2024 replay) | ✅ |
+| Fault injection | Dropouts, reconnection bursts, duplicates, reordering, battery decay | ✅ |
+| Load testing | Fleet replication (~25x baseline volume) | ✅ |
 
-**El subsistema de simulación está completo.** El uso real de MQTT contra AWS
-IoT Core se activa cuando exista la infraestructura cloud (etapa E2 del
-proyecto PyroSense).
+**The simulation subsystem is feature-complete.** Live MQTT publishing
+against AWS IoT Core activates once the PyroSense cloud backend exists.

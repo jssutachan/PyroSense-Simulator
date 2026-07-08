@@ -18,7 +18,7 @@ Baseline physics (reasoned approximations):
   hour), clamped to [0, 100].
 - Wind and smoke: constant baseline means.
 
-Fire events (Path 6) perturb the baseline in
+Fire events perturb the baseline in
 :meth:`EnvironmentModel.conditions_at`: each active
 :class:`~pyrosense_sim.fleet.fire_event.FireEvent` adds its deltas on
 top of the baseline, in configuration order.
@@ -65,7 +65,7 @@ class EnvironmentModel:
 
         Args:
             lon: Longitude in decimal degrees (unused by the baseline
-                model; kept for the Path 6 fire-event hook, which is
+                model; kept for the fire-event overlay, which is
                 spatial).
             lat: Latitude in decimal degrees (same as ``lon``).
             elevation_m: Site elevation in meters.
